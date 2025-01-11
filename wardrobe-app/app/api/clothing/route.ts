@@ -30,7 +30,6 @@ export async function GET(request: Request) {
   try {
     const client = await connectDB();
     const db = client.db("deltahacks");
-        
     const clothes = await db.collection('clothes').find({}).toArray();
 
     return NextResponse.json({ 

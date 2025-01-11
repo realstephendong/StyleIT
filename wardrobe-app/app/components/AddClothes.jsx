@@ -30,11 +30,15 @@ export default function AddClothes() {
     try {
       // Process the image
       console.log("Processing image...");
-      const response = await fetch(`http://localhost:3001/remove-background?url=${encodeURIComponent(formData.url)}`);
+      const response = await fetch(
+        `http://localhost:3001/remove-background?url=${encodeURIComponent(
+          formData.url
+        )}`
+      );
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error('Failed to process image');
+        throw new Error("Failed to process image");
       }
 
       console.log("Image processed successfully:", data.url);
@@ -56,8 +60,6 @@ export default function AddClothes() {
         price: "",
         brand: "",
       });
-
-      alert("Clothing item added successfully!");
     } catch (error) {
       console.error("Error:", error);
       alert("Error: " + error.message);
