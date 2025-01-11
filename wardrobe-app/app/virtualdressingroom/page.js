@@ -2,28 +2,36 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Camera, ZoomIn, ZoomOut, Download } from "lucide-react";
-import { Delaunay } from "d3-delaunay"; // Import Delaunay from d3
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 
-const applyClothingWithDelaunay = (
+// Create a cached image loader
+const imageCache = new Map();
+const loadImage = (src) => {
+  if (imageCache.has(src)) {
+    return Promise.resolve(imageCache.get(src));
+  }
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+};
+
+const applyClothing = async (
   poseLandmarks,
   ctx,
   clothingImage,
-  canvasRef
+  canvasRef,
+  previousTransform
 ) => {
-  if (
-    !poseLandmarks ||
-    !clothingImage ||
-    !canvasRef.current ||
-    poseLandmarks.length < 24
-  ) {
-    console.log("Missing required data for warping:", {
-      hasPoseLandmarks: !!poseLandmarks,
-      hasClothingImage: !!clothingImage,
-      hasCanvas: !!canvasRef.current,
-    });
-    return;
+  if (!poseLandmarks || !clothingImage || !canvasRef.current) {
+    return null;
   }
 
   const canvas = canvasRef.current;
@@ -32,62 +40,80 @@ const applyClothingWithDelaunay = (
   const leftHip = poseLandmarks[23];
   const rightHip = poseLandmarks[24];
 
-  if (leftShoulder && rightShoulder && leftHip && rightHip) {
-    const points = [
-      [leftShoulder.x * canvas.width, leftShoulder.y * canvas.height],
-      [rightShoulder.x * canvas.width, rightShoulder.y * canvas.height],
-      [leftHip.x * canvas.width, leftHip.y * canvas.height],
-      [rightHip.x * canvas.width, rightHip.y * canvas.height],
-    ];
+  // Ensure all necessary landmarks are available and visible
+  if (
+    leftShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+    rightShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+    leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+    rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD
+  ) {
+    // Calculate dimensions
+    const shoulderWidth = Math.abs(
+      (rightShoulder.x - leftShoulder.x) * canvas.width
+    );
+    const torsoHeight = Math.abs(
+      ((leftHip.y + rightHip.y) / 2 - (leftShoulder.y + rightShoulder.y) / 2) *
+        canvas.height
+    );
 
-    const delaunay = Delaunay.from(points);
-    const triangles = delaunay.triangles;
+    // Calculate center point between shoulders
+    const centerX = ((leftShoulder.x + rightShoulder.x) / 2) * canvas.width - 7;
+    const centerY = ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height + 30;
 
-    // Create an Image object
-    const img = new Image();
-    img.src = clothingImage; // clothingImage is the URL of the image
-    img.onload = () => {
-      const imgWidth = img.width;
-      const imgHeight = img.height;
+    try {
+      const img = await loadImage(clothingImage);
 
-      // Loop through triangles and apply mesh warping
+      // Calculate scaling factors
+      const scaleX = (shoulderWidth / img.width) * 2.2;
+      const scaleY = (torsoHeight / img.height) * 1.5;
+
+      // Create current transform object
+      const currentTransform = {
+        centerX,
+        centerY,
+        scaleX,
+        scaleY,
+      };
+
+      // Apply smoothing if previous transform exists
+      const smoothedTransform = previousTransform
+        ? {
+            centerX:
+              previousTransform.centerX * 0.8 + currentTransform.centerX * 0.2,
+            centerY:
+              previousTransform.centerY * 0.8 + currentTransform.centerY * 0.2,
+            scaleX:
+              previousTransform.scaleX * 0.8 + currentTransform.scaleX * 0.2,
+            scaleY:
+              previousTransform.scaleY * 0.8 + currentTransform.scaleY * 0.2,
+          }
+        : currentTransform;
+
       ctx.save();
 
-      // Draw each triangle separately
-      for (let i = 0; i < triangles.length; i += 3) {
-        const [p1, p2, p3] = [triangles[i], triangles[i + 1], triangles[i + 2]];
-        const [x1, y1] = points[p1];
-        const [x2, y2] = points[p2];
-        const [x3, y3] = points[p3];
+      // Transform context using smoothed values
+      ctx.translate(smoothedTransform.centerX, smoothedTransform.centerY);
+      ctx.scale(smoothedTransform.scaleX, smoothedTransform.scaleY);
 
-        // Calculate the bounding box of the clothing image
-        const clothingWidth = Math.abs(x1 - x2);
-        const clothingHeight = Math.abs(y1 - y3);
-
-        // Use the bounding box and the triangle to map the image
-        const clothingImg = new Image();
-        clothingImg.src = clothingImage;
-        clothingImg.onload = () => {
-          // Transform the image to the coordinates of the triangle
-          ctx.setTransform(
-            (x2 - x1) / imgWidth, // Scale X
-            (y2 - y1) / imgHeight, // Scale Y
-            (x3 - x1) / imgWidth, // Skew X
-            (y3 - y1) / imgHeight, // Skew Y
-            x1,
-            y1 // Translate
-          );
-
-          // Draw the image with transformed coordinates
-          ctx.drawImage(clothingImg, 0, 0, imgWidth, imgHeight);
-        };
-      }
+      // Draw image centered on shoulders
+      ctx.drawImage(
+        img,
+        -img.width / 2,
+        -img.height / 4,
+        img.width,
+        img.height
+      );
 
       ctx.restore();
-    };
-  }
-};
 
+      return smoothedTransform;
+    } catch (error) {
+      console.error("Error loading or drawing clothing image:", error);
+      return previousTransform;
+    }
+  }
+  return previousTransform;
+};
 
 const clothingItems = [
   {
@@ -101,21 +127,23 @@ const clothingItems = [
 export default function VirtualDressingRoom() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const transformRef = useRef(null);
   const [isMediaPipeReady, setIsMediaPipeReady] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [selectedClothing, setSelectedClothing] = useState(clothingItems[0]);
   const [clothingImage, setClothingImage] = useState(clothingItems[0].image);
-  const [holisticResults, setHolisticResults] = useState(null);
 
   useEffect(() => {
+    // Preload all clothing images
+    clothingItems.forEach((item) => {
+      loadImage(item.image);
+    });
+
     const setupMediaPipe = async () => {
       console.log("Starting MediaPipe setup...");
       try {
         const { Holistic } = await import("@mediapipe/holistic");
         const { Camera } = await import("@mediapipe/camera_utils");
-        const { drawConnectors, drawLandmarks } = await import(
-          "@mediapipe/drawing_utils"
-        );
 
         const holistic = new Holistic({
           locateFile: (file) =>
@@ -130,49 +158,26 @@ export default function VirtualDressingRoom() {
           refineFaceLandmarks: true,
         });
 
-        holistic.onResults((results) => {
+        holistic.onResults(async (results) => {
           if (!canvasRef.current) return;
           const canvas = canvasRef.current;
           const ctx = canvas.getContext("2d");
           if (!ctx) return;
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          setHolisticResults(results);
 
           if (results.image) {
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
           }
 
-          if (
-            results.poseLandmarks &&
-            results.poseLandmarks[11].visibility > POSE_CONFIDENCE_THRESHOLD &&
-            results.poseLandmarks[12].visibility > POSE_CONFIDENCE_THRESHOLD
-          ) {
-            // drawConnectors(
-            //   ctx,
-            //   results.poseLandmarks,
-            //   [
-            //     [11, 12],
-            //     [11, 23],
-            //     [12, 24],
-            //     [23, 24],
-            //   ],
-            //   {
-            //     color: "#00FF00",
-            //     lineWidth: 4,
-            //   }
-            // );
-            // drawLandmarks(ctx, results.poseLandmarks, {
-            //   color: "#FF0000",
-            //   lineWidth: 2,
-            // });
-
+          if (results.poseLandmarks) {
             if (selectedClothing && clothingImage) {
-              applyClothingWithDelaunay(
+              transformRef.current = await applyClothing(
                 results.poseLandmarks,
                 ctx,
                 clothingImage,
-                canvasRef
+                canvasRef,
+                transformRef.current
               );
             }
           }
@@ -249,10 +254,8 @@ export default function VirtualDressingRoom() {
                 key={item.id}
                 className="flex-shrink-0 cursor-pointer hover:opacity-75 transition-opacity"
                 onClick={() => {
-                  console.log("working");
-                  console.log(clothingImage);
-                  setClothingImage(clothingItems[0]);
-                  setSelectedClothing(clothingItems[0]);
+                  setClothingImage(item.image);
+                  setSelectedClothing(item);
                 }}
               >
                 <img
