@@ -4,6 +4,27 @@ import { useEffect, useRef, useState } from "react";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 
+const clothingItems = [
+  {
+    id: 1,
+    name: "Basic T-Shirt",
+    url: "https://i.imgur.com/OvY5xxt.png",
+    type: "top",
+  },
+  {
+    id: 2,
+    name: "Basic Jeans",
+    url: "https://i.imgur.com/ExddW8J.png",
+    type: "bottom",
+  },
+  {
+    id: 3,
+    name: "Baseball Cap",
+    url: "https://imgur.com/tn3dnbq.png",
+    type: "hat",
+  },
+];
+
 // Create a cached image loader
 const imageCache = new Map();
 const loadImage = (src) => {
@@ -281,27 +302,6 @@ const applyClothing = async (
   return previousTransform;
 };
 
-const clothingItems = [
-  {
-    id: 1,
-    name: "Basic T-Shirt",
-    image: "https://i.imgur.com/1WXAKVi.png",
-    type: "top",
-  },
-  {
-    id: 2,
-    name: "Basic Jeans",
-    image: "https://i.imgur.com/D1tiAAz.png",
-    type: "bottom",
-  },
-  {
-    id: 3,
-    name: "Baseball Cap",
-    image: "https://imgur.com/tn3dnbq.png", // Replace with actual hat image URL
-    type: "hat",
-  },
-];
-
 export default function VirtualDressingRoom() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -323,7 +323,7 @@ export default function VirtualDressingRoom() {
   useEffect(() => {
     // Preload all clothing images
     clothingItems.forEach((item) => {
-      loadImage(item.image);
+      loadImage(item.url);
     });
 
     const setupMediaPipe = async () => {
@@ -363,7 +363,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 ctx,
-                selectedBottom.image,
+                selectedBottom.url,
                 "bottom",
                 canvasRef,
                 bottomTransformRef.current
@@ -375,7 +375,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 ctx,
-                selectedTop.image,
+                selectedTop.url,
                 "top",
                 canvasRef,
                 topTransformRef.current
@@ -387,7 +387,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 ctx,
-                selectedHat.image,
+                selectedHat.url,
                 "hat",
                 canvasRef,
                 hatTransformRef.current
@@ -478,7 +478,7 @@ export default function VirtualDressingRoom() {
                       onClick={() => setSelectedTop(item)}
                     >
                       <img
-                        src={item.image}
+                        src={item.url}
                         alt={item.name}
                         width={96}
                         height={96}
@@ -502,7 +502,7 @@ export default function VirtualDressingRoom() {
                       onClick={() => setSelectedBottom(item)}
                     >
                       <img
-                        src={item.image}
+                        src={item.url}
                         alt={item.name}
                         width={96}
                         height={96}

@@ -19,16 +19,15 @@ export async function addClothing(clothingData) {
 }
   
 // To fetch clothing items
-async function getClothing(type?: string) {
+export async function getClothing() {
     try {
-        const url = type 
-        ? `/api/clothing?type=${encodeURIComponent(type)}`
-        : '/api/clothing';
-        
-        const response = await fetch(url);
+        const response = await fetch('/api/clothing', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
         const data = await response.json();
-        
-        return data.data;
+        console.log(data);
+        // return data.data;
     } catch (error) {
         console.error('Error fetching clothing:', error);
         throw error;

@@ -3,11 +3,12 @@ import mongoose from "mongoose";
 const ClothingSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["shirt", "pants"], // add more types later
+    enum: ["shirt", "pants", "hat"], // add more types later
   },
   price: Number,
   url: String,
   brand: String,
+  name: String,
 });
 
 // Prevent duplicate entries based on imagePath

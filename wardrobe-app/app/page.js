@@ -1,7 +1,11 @@
+import React from "react";
 import { Navbar } from "./components/navbar";
 import Slider from "./components/slider";
+import { getClothing } from "./utils/api";
 
-export default function Home() {
+export default async function Home() {
+  const data = await getClothing();
+
   const shirts = [
     { title: "Shirt 1", image: "sample.png" },
     { title: "Shirt 2", image: "sample.png" },
