@@ -18,7 +18,7 @@ export async function addClothing(clothingData) {
     }
 }
   
-  // To fetch clothing items
+// To fetch clothing items
 async function getClothing(type?: string) {
     try {
         const url = type 
