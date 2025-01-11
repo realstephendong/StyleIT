@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const client = await connectDB();
-    const db = client.db("wardrobe");
+    const db = client.db("deltahacks");
     
     // Get the data from request body
     const data = await request.json();
@@ -16,20 +16,12 @@ export async function POST(request: Request) {
       price: data.price,
       url: data.url,
       brand: data.brand,
-      createdAt: new Date()
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      data: result 
-    }, { status: 201 });
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error saving clothing:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Failed to save clothing item' 
-    }, { status: 500 });
   }
 }
 
