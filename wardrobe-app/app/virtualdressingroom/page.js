@@ -1,25 +1,30 @@
 // app/virtualdressingroom/page.js
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
-import dynamic from "next/dynamic";
+import React, { useEffect, useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
 
-import Image from "next/image";
-import TShirtImage from "@/../clothes/tshirt.png";
+// Add POSE_CONNECTIONS constant that was missing
+const POSE_CONNECTIONS = [
+  // Torso
+  [11, 12], // Left shoulder to right shoulder
+  [11, 23], // Left shoulder to left hip
+  [12, 24], // Right shoulder to right hip
+  [23, 24], // Left hip to right hip
+];
 
-const ClothingSelector = () => {
+const ClothingSelector = ({ onSelect }) => {  // Add onSelect as a prop
   const clothingItems = [
     {
       id: 1,
-      name: "Basic T-Shirt",
-      image: TShirtImage,
-      type: "top",
+      name: 'Basic T-Shirt',
+      image: "https://i.imgur.com/1WXAKVi.png",
+      type: 'top',
       anchorPoints: {
         shoulders: { left: [0.2, 0.1], right: [0.8, 0.1] },
-        waist: { left: [0.2, 0.9], right: [0.8, 0.9] },
-      },
-    },
+        waist: { left: [0.2, 0.9], right: [0.8, 0.9] }
+      }
+    }
   ];
 
   return (
@@ -30,8 +35,8 @@ const ClothingSelector = () => {
           className="flex-shrink-0 cursor-pointer hover:opacity-75 transition-opacity"
           onClick={() => onSelect(item)}
         >
-          <Image
-            src={item.image}
+          <img
+            src= "https://i.imgur.com/1WXAKVi.png"
             alt={item.name}
             width={96} // w-24 in Tailwind is 96px
             height={96}
@@ -56,19 +61,20 @@ export default function VirtualDressingRoom() {
     let camera;
 
     const setupMediaPipe = async () => {
+      console.log('Starting MediaPipe setup...');
       try {
+        console.log('Importing MediaPipe modules...');
         // Import MediaPipe modules dynamically
-        const { Holistic } = await import("@mediapipe/holistic");
-        const { Camera } = await import("@mediapipe/camera_utils");
-        const { drawConnectors, drawLandmarks } = await import(
-          "@mediapipe/drawing_utils"
-        );
+        const { Holistic } = await import('@mediapipe/holistic');
+        console.log('Holistic imported successfully');
+        const { Camera } = await import('@mediapipe/camera_utils');
+        const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
 
         // Initialize MediaPipe Holistic
         holistic = new Holistic({
           locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
-          },
+          }
         });
 
         // Configure MediaPipe settings
@@ -77,15 +83,15 @@ export default function VirtualDressingRoom() {
           smoothLandmarks: true,
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5,
-          refineFaceLandmarks: true,
+          refineFaceLandmarks: true
         });
 
         // Set up the onResults callback
         holistic.onResults((results) => {
           if (!canvasRef.current) return;
-
+          
           const canvas = canvasRef.current;
-          const ctx = canvas.getContext("2d");
+          const ctx = canvas.getContext('2d');
           if (!ctx) return;
 
           // Clear canvas
@@ -99,53 +105,44 @@ export default function VirtualDressingRoom() {
           // Draw pose landmarks and apply clothing
           if (results.poseLandmarks) {
             // For debugging - comment out in production
-            drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-              color: "#00FF00",
-              lineWidth: 4,
-            });
-            drawLandmarks(ctx, results.poseLandmarks, {
-              color: "#FF0000",
-              lineWidth: 2,
-            });
-
+            drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, 
+              { color: '#00FF00', lineWidth: 4 });
+            drawLandmarks(ctx, results.poseLandmarks,
+              { color: '#FF0000', lineWidth: 2 });
+            
             if (selectedClothing) {
               // Create an offscreen canvas for processing
-              const offscreen = new OffscreenCanvas(
-                canvas.width,
-                canvas.height
-              );
-              const offscreenCtx = offscreen.getContext("2d");
-
+              const offscreen = new OffscreenCanvas(canvas.width, canvas.height);
+              const offscreenCtx = offscreen.getContext('2d');
+              
               // First draw the camera frame
-              offscreenCtx.drawImage(
-                results.image,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-              );
-
+              offscreenCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+              
               // Then overlay clothing with alpha blending
               const blendedImage = applyClothingWithBlending(
-                results.poseLandmarks,
+                results.poseLandmarks, 
                 offscreenCtx,
                 selectedClothing
               );
-
+              
               // Draw final result to main canvas
               ctx.drawImage(blendedImage, 0, 0);
             }
           }
         });
 
+        console.log('Initializing camera...');
         // Initialize camera
-        if (!videoRef.current) return;
-
+        if (!videoRef.current) {
+          console.error('Video ref not found');
+          return;
+        }
+        
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480 },
-          audio: false,
+          audio: false
         });
-
+        
         videoRef.current.srcObject = stream;
 
         // Set up MediaPipe Camera
@@ -156,13 +153,14 @@ export default function VirtualDressingRoom() {
             }
           },
           width: 640,
-          height: 480,
+          height: 480
         });
 
         await camera.start();
         setIsLoading(false);
+
       } catch (error) {
-        console.error("Error setting up MediaPipe:", error);
+        console.error('Error setting up MediaPipe:', error);
         setIsLoading(false);
       }
     };
@@ -195,74 +193,58 @@ export default function VirtualDressingRoom() {
       // Calculate clothing dimensions
       const shoulderWidth = Math.sqrt(
         Math.pow((rightShoulder.x - leftShoulder.x) * canvas.width, 2) +
-          Math.pow((rightShoulder.y - leftShoulder.y) * canvas.height, 2)
+        Math.pow((rightShoulder.y - leftShoulder.y) * canvas.height, 2)
       );
-
+      
       const torsoHeight = Math.sqrt(
         Math.pow((leftHip.x - leftShoulder.x) * canvas.width, 2) +
-          Math.pow((leftHip.y - leftShoulder.y) * canvas.height, 2)
+        Math.pow((leftHip.y - leftShoulder.y) * canvas.height, 2)
       );
 
       // Create a temporary canvas for the clothing
       const tempCanvas = new OffscreenCanvas(canvas.width, canvas.height);
-      const tempCtx = tempCanvas.getContext("2d");
-
+      const tempCtx = tempCanvas.getContext('2d');
+      
       // Draw and transform clothing
       tempCtx.save();
-
+      
       // Calculate rotation
       const angle = Math.atan2(
         rightShoulder.y - leftShoulder.y,
         rightShoulder.x - leftShoulder.x
       );
 
-      tempCtx.translate(
-        leftShoulder.x * canvas.width,
-        leftShoulder.y * canvas.height
-      );
+      tempCtx.translate(leftShoulder.x * canvas.width, leftShoulder.y * canvas.height);
       tempCtx.rotate(angle);
       tempCtx.scale(
         shoulderWidth / clothingImage.width,
         torsoHeight / clothingImage.height
       );
-
+      
       tempCtx.drawImage(clothingImage, 0, 0);
-
+      
       // Get image data for blending
-      const clothingData = tempCtx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-      const backgroundData = ctx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
+      const clothingData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+      const backgroundData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
       // Blend pixels
       for (let i = 0; i < clothingData.data.length; i += 4) {
         // Alpha blending formula
         const alpha = clothingData.data[i + 3] / 255;
-        if (alpha > 0) {
-          // Only process non-transparent pixels
-          backgroundData.data[i] =
-            clothingData.data[i] * alpha + backgroundData.data[i] * (1 - alpha);
-          backgroundData.data[i + 1] =
-            clothingData.data[i + 1] * alpha +
-            backgroundData.data[i + 1] * (1 - alpha);
-          backgroundData.data[i + 2] =
-            clothingData.data[i + 2] * alpha +
-            backgroundData.data[i + 2] * (1 - alpha);
+        if (alpha > 0) {  // Only process non-transparent pixels
+          backgroundData.data[i] = (clothingData.data[i] * alpha) + 
+                                 (backgroundData.data[i] * (1 - alpha));
+          backgroundData.data[i + 1] = (clothingData.data[i + 1] * alpha) + 
+                                     (backgroundData.data[i + 1] * (1 - alpha));
+          backgroundData.data[i + 2] = (clothingData.data[i + 2] * alpha) + 
+                                     (backgroundData.data[i + 2] * (1 - alpha));
         }
       }
-
+      
       // Put the blended image back
       ctx.putImageData(backgroundData, 0, 0);
       tempCtx.restore();
-
+      
       return tempCanvas;
     }
   };
@@ -270,34 +252,40 @@ export default function VirtualDressingRoom() {
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          Virtual Dressing Room
-        </h1>
-
+        <h1 className="text-3xl font-bold mb-8 text-center">Virtual Dressing Room</h1>
+        
         <div className="relative w-full max-w-2xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-50">
               <div className="text-white text-lg">Loading camera...</div>
             </div>
           )}
-
-          <video ref={videoRef} className="w-full" autoPlay playsInline />
+          
+          <video
+            ref={videoRef}
+            className="w-full"
+            autoPlay
+            playsInline
+          />
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full"
             width={640}
             height={480}
           />
-
-          {/* Camera controls */}
+          
+          {/* Camera controls - Uncomment after installing lucide-react
           <div className="absolute bottom-4 left-4 p-2 bg-white rounded-lg shadow-lg">
             <Camera className="w-6 h-6 text-gray-600" />
-          </div>
+          </div> */}
         </div>
 
         {/* Clothing selector */}
         <div className="mt-8">
-          <ClothingSelector onSelect={setSelectedClothing} />
+          <ClothingSelector onSelect={(clothing) => {
+            console.log('Selected clothing:', clothing);
+            setSelectedClothing(clothing);
+          }} />
         </div>
       </div>
     </div>
