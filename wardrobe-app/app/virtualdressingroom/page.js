@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, ZoomIn, ZoomOut, Download } from "lucide-react";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -321,22 +320,6 @@ export default function VirtualDressingRoom() {
     clothingItems.find((item) => item.type === "hat")
   );
 
-  const handleScreenshot = () => {
-    if (canvasRef.current) {
-      // Create a temporary link element
-      const link = document.createElement("a");
-      // Get the canvas data as a URL
-      const imageData = canvasRef.current.toDataURL("image/png");
-      link.href = imageData;
-      // Set the download filename
-      link.download = "virtual-dressing-room.png";
-      // Programmatically click the link to trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   useEffect(() => {
     // Preload all clothing images
     clothingItems.forEach((item) => {
@@ -414,7 +397,7 @@ export default function VirtualDressingRoom() {
         });
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720 },
+          video: { width: 960, height: 720 },
           audio: false,
         });
 
@@ -427,7 +410,7 @@ export default function VirtualDressingRoom() {
               await holistic.send({ image: videoRef.current });
             }
           },
-          width: 1280,
+          width: 960,
           height: 720,
         });
 
@@ -476,16 +459,9 @@ export default function VirtualDressingRoom() {
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full"
-            width={1280}
+            width={960}
             height={720}
           />
-          <button
-            onClick={handleScreenshot}
-            className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-            title="Take Screenshot"
-          >
-            <Camera className="w-6 h-6 text-gray-800" />
-          </button>
         </div>
 
         <div className="mt-8">
