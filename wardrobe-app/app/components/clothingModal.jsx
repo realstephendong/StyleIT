@@ -1,0 +1,37 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Link from "next/link";
+
+export default function ClothingModal({ children }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Brand Name</DialogTitle>
+          <DialogDescription>Shirt/Pants</DialogDescription>
+        </DialogHeader>
+
+        <img
+          src={"sample.png"}
+          alt="Image"
+          className="w-full rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
+        />
+
+        <Link href="/virtualdressingroom" passHref>
+          <Button type="submit" className="w-full">
+            Try it out
+          </Button>
+        </Link>
+      </DialogContent>
+    </Dialog>
+  );
+}

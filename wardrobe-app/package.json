@@ -10,16 +10,21 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@imgly/background-removal-node": "^1.4.5",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/holistic": "^0.5.1675471629",
+    "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-slot": "^1.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "d3-delaunay": "^6.0.4",
+    "filereader": "^0.10.3",
     "framer-motion": "^11.17.0",
+    "imgur": "^1.0.2",
     "lucide-react": "^0.471.0",
     "mongodb": "^6.12.0",
     "next": "15.1.4",
@@ -29,15 +34,13 @@
     "remove-bg-node": "^1.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1",
-    "@imgly/background-removal-node": "^1.4.3",
-    "filereader": "^0.10.3",
-    "imgur": "^1.0.2"
-    
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "22.10.5",
     "@types/react": "19.0.4",
+    "filereader": "^0.10.3",
+    "imgur": "^1.0.2",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "5.7.3"

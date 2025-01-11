@@ -1,5 +1,68 @@
-import Navbar from "./components/navbar";
+import { Navbar } from "./components/navbar";
+import Slider from "./components/slider";
 
 export default function Home() {
-  return <div>{/* <Navbar /> */}</div>;
+  const categories = 
+    {
+      heading: "Shirts",
+      items: [
+        { title: "Shirt 1", image: "sample.png" },
+        { title: "Shirt 2", image: "sample.png" },
+        { title: "Shirt 3", image: "sample.png" },
+        { title: "Shirt 4", image: "sample.png" },
+        { title: "Shirt 5", image: "sample.png" },
+        { title: "Shirt 6", image: "sample.png" },
+        { title: "Shirt 7", image: "sample.png" },
+        { title: "Shirt 8", image: "sample.png" },
+      ],
+    },
+    {
+      heading: "Pants",
+      items: [
+        { title: "Pants 1", image: "sample.png" },
+        { title: "Pants 2", image: "sample.png" },
+        { title: "Pants 3", image: "sample.png" },
+        { title: "Pants 4", image: "sample.png" },
+        { title: "Pants 5", image: "sample.png" },
+        { title: "Pants 6", image: "sample.png" },
+        { title: "Pants 7", image: "sample.png" },
+        { title: "Pants 8", image: "sample.png" },
+        { title: "Pants 9", image: "sample.png" },
+        { title: "Pants 10", image: "sample.png" },
+      ],
+    },
+    {
+      heading: "Discover",
+      items: [
+        { title: "Discover 1", image: "sample.png" },
+        { title: "Discover 2", image: "sample.png" },
+        { title: "Discover 3", image: "sample.png" },
+        { title: "Discover 4", image: "sample.png" },
+        { title: "Discover 5", image: "sample.png" },
+        { title: "Discover 6", image: "sample.png" },
+        { title: "Discover 7", image: "sample.png" },
+        { title: "Discover 8", image: "sample.png" },
+        { title: "Discover 9", image: "sample.png" },
+        { title: "Discover 10", image: "sample.png" },
+        { title: "Discover 11", image: "sample.png" },
+        { title: "Discover 12", image: "sample.png" },
+        { title: "Discover 13", image: "sample.png" },
+        { title: "Discover 14", image: "sample.png" },
+        { title: "Discover 15", image: "sample.png" },
+        { title: "Discover 16", image: "sample.png" },
+        { title: "Discover 17", image: "sample.png" },
+        { title: "Discover 18", image: "sample.png" },
+      ],
+    },
+  ];
+
+  return (
+    <>
+      <Navbar />
+
+      <div>
+        <Slider />
+      </div>
+    </>
+  );
 }

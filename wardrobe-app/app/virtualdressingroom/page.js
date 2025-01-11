@@ -25,6 +25,7 @@ const loadImage = (src) => {
 
 const applyClothing = async (
   poseLandmarks,
+  faceLandmarks,
   ctx,
   clothingImage,
   clothingType,
@@ -37,20 +38,102 @@ const applyClothing = async (
 
   const canvas = canvasRef.current;
 
-  if (clothingType === "top") {
+  if (clothingType === "hat" && faceLandmarks) {
+    // Use face landmarks for hat positioning
+    const foreheadTop = faceLandmarks[10]; // Top of forehead
+    const leftTemple = faceLandmarks[234]; // Left temple
+    const rightTemple = faceLandmarks[454]; // Right temple
+
+    // Get torso landmarks for scaling reference
     const leftShoulder = poseLandmarks[11];
     const rightShoulder = poseLandmarks[12];
     const leftHip = poseLandmarks[23];
     const rightHip = poseLandmarks[24];
 
-    // Ensure all necessary landmarks are available and visible
+    if (
+      foreheadTop &&
+      leftTemple &&
+      rightTemple &&
+      leftShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+      rightShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+      leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
+      rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD
+    ) {
+      const headWidth = Math.abs((rightTemple.x - leftTemple.x) * canvas.width);
+
+      // Calculate torso height for relative scaling
+      const torsoHeight = Math.abs(
+        ((leftHip.y + rightHip.y) / 2 -
+          (leftShoulder.y + rightShoulder.y) / 2) *
+          canvas.height
+      );
+
+      // Calculate vertical offset based on torso height
+      const verticalOffset = torsoHeight * 0.11; // Adjust this multiplier to fine-tune the positioning
+
+      // Position above the forehead with dynamic offset
+      const centerX = foreheadTop.x * canvas.width;
+      const centerY = foreheadTop.y * canvas.height - verticalOffset;
+
+      try {
+        const img = await loadImage(clothingImage);
+
+        // Scale based on head width
+        const scaleX = (headWidth / img.width) * 1.4;
+        const scaleY = (headWidth / img.width) * 1.4; // Maintain aspect ratio
+
+        const currentTransform = {
+          centerX,
+          centerY,
+          scaleX,
+          scaleY,
+        };
+
+        const smoothedTransform = previousTransform
+          ? {
+              centerX:
+                previousTransform.centerX * 0.8 +
+                currentTransform.centerX * 0.2,
+              centerY:
+                previousTransform.centerY * 0.8 +
+                currentTransform.centerY * 0.2,
+              scaleX:
+                previousTransform.scaleX * 0.8 + currentTransform.scaleX * 0.2,
+              scaleY:
+                previousTransform.scaleY * 0.8 + currentTransform.scaleY * 0.2,
+            }
+          : currentTransform;
+
+        ctx.save();
+        ctx.translate(smoothedTransform.centerX, smoothedTransform.centerY);
+        ctx.scale(smoothedTransform.scaleX, smoothedTransform.scaleY);
+        ctx.drawImage(
+          img,
+          -img.width / 2,
+          -img.height / 2,
+          img.width,
+          img.height
+        );
+        ctx.restore();
+
+        return smoothedTransform;
+      } catch (error) {
+        console.error("Error loading or drawing hat image:", error);
+        return previousTransform;
+      }
+    }
+  } else if (clothingType === "top") {
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
+    const leftHip = poseLandmarks[23];
+    const rightHip = poseLandmarks[24];
+
     if (
       leftShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
       rightShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
       leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
       rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD
     ) {
-      // Calculate dimensions
       const shoulderWidth = Math.abs(
         (rightShoulder.x - leftShoulder.x) * canvas.width
       );
@@ -60,20 +143,19 @@ const applyClothing = async (
           canvas.height
       );
 
-      // Calculate center point between shoulders
+      const verticalOffset = torsoHeight * 0.1;
+
       const centerX =
         ((leftShoulder.x + rightShoulder.x) / 2) * canvas.width - 7;
       const centerY =
-        ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height + 30;
+        ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height + verticalOffset;
 
       try {
         const img = await loadImage(clothingImage);
 
-        // Calculate scaling factors
         const scaleX = (shoulderWidth / img.width) * 2.2;
         const scaleY = (torsoHeight / img.height) * 1.5;
 
-        // Create current transform object
         const currentTransform = {
           centerX,
           centerY,
@@ -81,7 +163,6 @@ const applyClothing = async (
           scaleY,
         };
 
-        // Apply smoothing if previous transform exists
         const smoothedTransform = previousTransform
           ? {
               centerX:
@@ -122,6 +203,8 @@ const applyClothing = async (
     const rightKnee = poseLandmarks[26];
     const leftAnkle = poseLandmarks[27];
     const rightAnkle = poseLandmarks[28];
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
 
     if (
       leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
@@ -136,16 +219,22 @@ const applyClothing = async (
         ((leftAnkle.y + rightAnkle.y) / 2 - (leftHip.y + rightHip.y) / 2) *
           canvas.height
       );
+      const torsoHeight = Math.abs(
+        ((leftHip.y + rightHip.y) / 2 -
+          (leftShoulder.y + rightShoulder.y) / 2) *
+          canvas.height
+      );
+
+      const verticalOffset = torsoHeight * 0.75;
 
       const centerX = ((leftHip.x + rightHip.x) / 2) * canvas.width;
-      const centerY = ((leftHip.y + rightHip.y) / 2) * canvas.height + 100;
+      const centerY = ((leftHip.y + rightHip.y) / 2) * canvas.height + verticalOffset;
 
       try {
         const img = await loadImage(clothingImage);
 
-        // Calculate scaling factors for pants
-        const scaleX = (hipWidth / img.width) * 2.5; // Slightly wider than hips
-        const scaleY = (legLength / img.height) * 1.2;
+        const scaleX = (hipWidth / img.width) * 2.5;
+        const scaleY = (legLength / img.height) * 1.35;
 
         const currentTransform = {
           centerX,
@@ -201,8 +290,14 @@ const clothingItems = [
   {
     id: 2,
     name: "Basic Jeans",
-    image: "https://i.imgur.com/D1tiAAz.png", // Replace with actual pants image URL
+    image: "https://i.imgur.com/D1tiAAz.png",
     type: "bottom",
+  },
+  {
+    id: 3,
+    name: "Baseball Cap",
+    image: "https://imgur.com/tn3dnbq.png", // Replace with actual hat image URL
+    type: "hat",
   },
 ];
 
@@ -211,6 +306,7 @@ export default function VirtualDressingRoom() {
   const canvasRef = useRef(null);
   const topTransformRef = useRef(null);
   const bottomTransformRef = useRef(null);
+  const hatTransformRef = useRef(null);
   const [isMediaPipeReady, setIsMediaPipeReady] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [selectedTop, setSelectedTop] = useState(
@@ -218,6 +314,9 @@ export default function VirtualDressingRoom() {
   );
   const [selectedBottom, setSelectedBottom] = useState(
     clothingItems.find((item) => item.type === "bottom")
+  );
+  const [selectedHat, setSelectedHat] = useState(
+    clothingItems.find((item) => item.type === "hat")
   );
 
   useEffect(() => {
@@ -261,6 +360,7 @@ export default function VirtualDressingRoom() {
             if (selectedBottom) {
               bottomTransformRef.current = await applyClothing(
                 results.poseLandmarks,
+                results.faceLandmarks,
                 ctx,
                 selectedBottom.image,
                 "bottom",
@@ -272,6 +372,7 @@ export default function VirtualDressingRoom() {
             if (selectedTop) {
               topTransformRef.current = await applyClothing(
                 results.poseLandmarks,
+                results.faceLandmarks,
                 ctx,
                 selectedTop.image,
                 "top",
@@ -279,11 +380,23 @@ export default function VirtualDressingRoom() {
                 topTransformRef.current
               );
             }
+
+            if (selectedHat && results.faceLandmarks) {
+              hatTransformRef.current = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                ctx,
+                selectedHat.image,
+                "hat",
+                canvasRef,
+                hatTransformRef.current
+              );
+            }
           }
         });
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 640, height: 480 },
+          video: { width: 1280, height: 960 },
           audio: false,
         });
 
