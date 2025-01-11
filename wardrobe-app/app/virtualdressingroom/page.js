@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, ZoomIn, ZoomOut, Download } from "lucide-react";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
@@ -148,7 +148,8 @@ const applyClothing = async (
       const centerX =
         ((leftShoulder.x + rightShoulder.x) / 2) * canvas.width - 7;
       const centerY =
-        ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height + verticalOffset;
+        ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height +
+        verticalOffset;
 
       try {
         const img = await loadImage(clothingImage);
@@ -228,7 +229,8 @@ const applyClothing = async (
       const verticalOffset = torsoHeight * 0.75;
 
       const centerX = ((leftHip.x + rightHip.x) / 2) * canvas.width;
-      const centerY = ((leftHip.y + rightHip.y) / 2) * canvas.height + verticalOffset;
+      const centerY =
+        ((leftHip.y + rightHip.y) / 2) * canvas.height + verticalOffset;
 
       try {
         const img = await loadImage(clothingImage);
@@ -319,6 +321,22 @@ export default function VirtualDressingRoom() {
     clothingItems.find((item) => item.type === "hat")
   );
 
+  const handleScreenshot = () => {
+    if (canvasRef.current) {
+      // Create a temporary link element
+      const link = document.createElement("a");
+      // Get the canvas data as a URL
+      const imageData = canvasRef.current.toDataURL("image/png");
+      link.href = imageData;
+      // Set the download filename
+      link.download = "virtual-dressing-room.png";
+      // Programmatically click the link to trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   useEffect(() => {
     // Preload all clothing images
     clothingItems.forEach((item) => {
@@ -396,7 +414,7 @@ export default function VirtualDressingRoom() {
         });
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 960 },
+          video: { width: 1280, height: 720 },
           audio: false,
         });
 
@@ -410,7 +428,7 @@ export default function VirtualDressingRoom() {
             }
           },
           width: 1280,
-          height: 960,
+          height: 720,
         });
 
         await camera.start();
@@ -439,7 +457,7 @@ export default function VirtualDressingRoom() {
           Virtual Dressing Room
         </h1>
 
-        <div className="relative w-full max-w-2xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
+        <div className="relative w-full max-w-5xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg">
           {(!isMediaPipeReady || !isCameraReady) && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-50">
               <div className="text-white text-lg">
@@ -449,14 +467,25 @@ export default function VirtualDressingRoom() {
               </div>
             </div>
           )}
-
-          <video ref={videoRef} className="w-full" autoPlay playsInline />
+          <video
+            ref={videoRef}
+            className="w-full h-full"
+            autoPlay
+            playsInline
+          />
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full"
-            width={640}
-            height={480}
+            width={1280}
+            height={720}
           />
+          <button
+            onClick={handleScreenshot}
+            className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+            title="Take Screenshot"
+          >
+            <Camera className="w-6 h-6 text-gray-800" />
+          </button>
         </div>
 
         <div className="mt-8">

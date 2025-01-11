@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 
-export default function ClothingModal({ children }) {
+export default function ClothingModal({ brand, type, children }) {
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Brand Name</DialogTitle>
-          <DialogDescription>Shirt/Pants</DialogDescription>
+          <DialogTitle>{brand}</DialogTitle>
+          <DialogDescription>{type}</DialogDescription>
         </DialogHeader>
 
         <img
