@@ -1,5 +1,5 @@
 // To add a new clothing item
-async function addClothing(clothingData) {
+export async function addClothing(clothingData) {
     try {
       const response = await fetch('/api/clothing', {
         method: 'POST',
@@ -10,7 +10,6 @@ async function addClothing(clothingData) {
       });
       
       const data = await response.json();
-      if (!data.success) throw new Error(data.error);
       
       return data;
     } catch (error) {
@@ -28,8 +27,6 @@ async function getClothing(type?: string) {
         
         const response = await fetch(url);
         const data = await response.json();
-        
-        if (!data.success) throw new Error(data.error);
         
         return data.data;
     } catch (error) {
