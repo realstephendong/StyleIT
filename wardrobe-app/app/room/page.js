@@ -66,7 +66,7 @@ export default function VirtualDressingRoom() {
     },
   ];
 
-  const imageCache = new Map();
+const imageCache = new Map();
 const loadImage = (src) => {
   if (imageCache.has(src)) {
     return Promise.resolve(imageCache.get(src));
@@ -83,15 +83,28 @@ const loadImage = (src) => {
   });
 };
 
+const calculateRotations = {
+  hat: (faceLandmarks) => {
+    const leftEye = faceLandmarks[33];
+    const rightEye = faceLandmarks[263];
+    return Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
+  }, 
+}
+
 // Separate transform calculation logic for better organization
 const calculateTransform = (currentTransform, previousTransform) => {
   if (!previousTransform) return currentTransform;
+
+  const smoothRotation = previousTransform.rotation !== undefined
+      ? previousTransform.rotation * SMOOTHING_FACTOR + currentTransform.rotation * (1 - SMOOTHING_FACTOR)
+      : currentTransform.rotation;
   
   return {
     centerX: previousTransform.centerX * SMOOTHING_FACTOR + currentTransform.centerX * (1 - SMOOTHING_FACTOR),
     centerY: previousTransform.centerY * SMOOTHING_FACTOR + currentTransform.centerY * (1 - SMOOTHING_FACTOR),
     scaleX: previousTransform.scaleX * SMOOTHING_FACTOR + currentTransform.scaleX * (1 - SMOOTHING_FACTOR),
     scaleY: previousTransform.scaleY * SMOOTHING_FACTOR + currentTransform.scaleY * (1 - SMOOTHING_FACTOR),
+    rotation: smoothRotation,
   };
 };
 
@@ -143,9 +156,6 @@ const calculateTransform = (currentTransform, previousTransform) => {
     const canvas = canvasRef.current;
     const ctx = contextRef.current;
 
-    // Continuing from previous file...
-
-    // Optimized hat positioning logic
     if (clothingType === "hat" && faceLandmarks) {
       const foreheadTop = faceLandmarks[10];
       const leftTemple = faceLandmarks[234];
@@ -177,15 +187,20 @@ const calculateTransform = (currentTransform, previousTransform) => {
 
         try {
           const img = await loadImage(clothingImage);
+          const hatRotation = calculateRotations.hat(faceLandmarks);
           const transform = calculateTransform({
             centerX: foreheadTop.x * canvas.width,
             centerY: foreheadTop.y * canvas.height - torsoHeight * 0.11,
             scaleX: (headWidth / img.width) * 1.4,
-            scaleY: (headWidth / img.width) * 1.4
+            scaleY: (headWidth / img.width) * 1.4,
+            rotation: hatRotation
           }, previousTransform);
 
           ctx.save();
           ctx.translate(transform.centerX, transform.centerY);
+          if (transform.rotation) {
+            ctx.rotate(transform.rotation);
+          }
           ctx.scale(transform.scaleX, transform.scaleY);
           ctx.drawImage(img, -img.width / 2, -img.height / 2, img.width, img.height);
           ctx.restore();
@@ -265,6 +280,8 @@ const calculateTransform = (currentTransform, previousTransform) => {
           right: poseLandmarks[12]
         }
       };
+
+      
 
       const landmarksVisible = Object.values(landmarks).every(
         pair => pair.left?.visibility > POSE_CONFIDENCE_THRESHOLD && 

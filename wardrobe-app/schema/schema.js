@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const ClothingSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["shirt", "pants", "hat"], // add more types later
+    enum: ["Shirt", "Pants", "Hat"], // add more types later
   },
   price: Number,
   url: String,

@@ -10,9 +10,8 @@ export default async function Home() {
     <>
       <Navbar />
 
-      <div className="min-h-screen ">
+      <div className="min-h-screen">
         <Slider heading="Shirts" items={data.shirt} />
-
         <Slider heading="Pants" items={data.pants} />
         <Slider heading="Hats" items={data.hat} />
       </div>
