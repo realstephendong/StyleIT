@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { Plus, Settings, User } from "lucide-react";
 
-export function PopoverButton({ children }) {
+export function AccountPopover({ children }) {
   const handleClick = () => {
     console.log("clicked");
   };

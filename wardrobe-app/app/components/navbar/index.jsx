@@ -1,7 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Shirt, User, ShoppingBag } from "lucide-react";
-import { PopoverButton } from "./popoverButton";
+import { AccountPopover } from "./accountPopover";
+import { BasketPopover } from "./basketPopover";
 
 export const Navbar = () => {
   return (
@@ -22,17 +23,17 @@ export const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-6">
-          <Button variant="ghost" size="icon">
+          <BasketPopover>
             <ShoppingBag />
-          </Button>
+          </BasketPopover>
 
           <Button variant="ghost" size="icon">
             <Shirt />
           </Button>
 
-          <PopoverButton>
+          <AccountPopover>
             <User />
-          </PopoverButton>
+          </AccountPopover>
         </div>
       </div>
     </nav>

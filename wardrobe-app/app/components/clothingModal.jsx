@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose
 } from "@/components/ui/dialog";
 import { useClothing } from "@/contexts/clothing";
 
@@ -49,9 +50,11 @@ export default function ClothingModal({ brand, type, item, children }) {
           className="w-full h-60 object-contain rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
         />
 
-        <Button type="submit" className="w-full" onClick={handleAddToCart}>
-          Add to cart
-        </Button>
+        <DialogClose>
+          <Button type="submit" className="w-full" onClick={handleAddToCart}>
+            Add to cart
+          </Button>
+        </DialogClose>
       </DialogContent>
     </Dialog>
   );

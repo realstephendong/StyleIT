@@ -7,12 +7,12 @@ const Slider = ({ heading, items }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">{heading}</h2>
+    <div className="py-8">
+      <h2 className="text-3xl font-bold px-8">{heading}</h2>
       <div className="relative group">
         <div className="overflow-hidden">
           <div
-            className="flex transition-transform duration-500 ease-out"
+            className="flex transition-transform duration-500 ease-out p-8 bg-[#f5f5f7] rounded-lg "
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
             {items.map((item, index) => (
@@ -23,13 +23,13 @@ const Slider = ({ heading, items }) => {
                 key={index}
               >
                 <div className="flex-none w-1/5 px-1 cursor-pointer">
-                  <div className="relative h-64 flex items-center justify-center bg-white rounded-md shadow-md transform transition-transform duration-200 hover:scale-110 hover:shadow-xl hover:-translate-y-2 p-2">
+                  <div className="relative h-64 flex items-center justify-center bg-white transform transition-transform duration-200 hover:scale-105  hover:-translate-y-2  p-2 rounded-lg">
                     <img
                       src={item.url}
                       alt={item.brand}
-                      className="max-h-full max-w-full object-contain rounded-md"
+                      className="max-h-full max-w-full object-contain p-2"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover/item:bg-opacity-50 transition-opacity duration-300 rounded-md bg-[#ffffff]">
+                    <div className="absolute inset-0 bg-opacity-0 group-hover/item:bg-opacity-50 transition-opacity duration-300  bg-[#ffffff]">
                       <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
                         <div className="flex justify-between items-center">
                           <p className="text-sm font-semibold text-white">
