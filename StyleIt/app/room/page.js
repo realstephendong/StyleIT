@@ -38,7 +38,7 @@ export default function VirtualDressingRoom() {
     {
       id: 5,
       name: "Black Pants",
-      url: "https://i.imgur.com/YD23Yw9.png",
+      url: "https://i.imgur.com/cPfXozQ.png",
       type: "bottom",
     },
     {
@@ -605,6 +605,20 @@ export default function VirtualDressingRoom() {
           </div>
         </div>
       </div>
+
+      <button
+        onClick={() => {
+          saveOutfit({
+            hat: selectedItems.hat,
+            top: selectedItems.top,
+            bottom: selectedItems.bottom,
+          });
+        }}
+        disabled={!selectedItems.top && !selectedItems.bottom && !selectedItems.hat}
+        className="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Save Outfit
+      </button>
 
       <Footer />
     </>

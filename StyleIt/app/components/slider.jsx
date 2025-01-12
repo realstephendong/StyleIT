@@ -5,11 +5,9 @@ import ClothingModal from "./clothingModal";
 
 const getEmoji = (heading) => {
   const emojis = {
-    Shirts: "👕",
+    Tops: "👕",
     Pants: "👖",
-    Hats: "🧢",
-    Shoes: "👟",
-    Jackets: "🧥",
+    Hats: "🧢"
   };
   return emojis[heading] || "👔";
 };
@@ -58,7 +56,7 @@ const Slider = ({ heading, items }) => {
                     </div>
 
                     <div className="p-4 border-t bg-white">
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-bold text-gray-900">
                         {item.brand}
                       </h3>
                       <div className="flex justify-between items-center mt-1">

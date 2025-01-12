@@ -14,13 +14,13 @@ const setState = (item, value) => {
 };
 
 export function ClothingProvider({ children }) {
-  const [shirts, setShirts] = useState(getState("shirts"));
+  const [tops, setTops] = useState(getState("tops"));
   const [pants, setPants] = useState(getState("pants"));
   const [hats, setHats] = useState(getState("hats"));
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    setState("shirts", shirts);
+    setState("tops", shirts);
   }, [shirts]);
 
   useEffect(() => {
@@ -32,12 +32,12 @@ export function ClothingProvider({ children }) {
   }, [hats]);
 
   useEffect(() => {
-    setTotal(shirts.length + pants.length + hats.length);
+    setTotal(tops.length + pants.length + hats.length);
   }, [shirts, pants, hats]);
 
   return (
     <ClothingContext.Provider
-      value={{ shirts, setShirts, pants, setPants, hats, setHats, total }}
+      value={{ tops, setTops, pants, setPants, hats, setHats, total }}
     >
       {children}
     </ClothingContext.Provider>

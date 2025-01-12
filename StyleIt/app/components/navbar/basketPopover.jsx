@@ -150,7 +150,7 @@ export function BasketPopover({ children }) {
                 Your basket is empty
               </h3>
               <p className="text-gray-500 text-sm mb-4">
-                Add items to your basket to start shopping
+                Add items to your basket to try them on
               </p>
             </div>
           )}

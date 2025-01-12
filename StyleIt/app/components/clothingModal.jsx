@@ -51,7 +51,10 @@ export default function ClothingModal({ brand, type, item, children }) {
         />
 
         <DialogClose asChild>
-          <Button className="w-full mt-4 shadow-2xl" onClick={handleAddToCart}>
+          <Button
+            className="w-full mt-4 shadow-2xl font-semibold"
+            onClick={handleAddToCart}
+          >
             Add to basket
           </Button>
         </DialogClose>

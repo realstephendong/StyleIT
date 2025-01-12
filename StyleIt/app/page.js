@@ -12,7 +12,7 @@ export default async function Home() {
       <Navbar />
 
       <div className="p-8">
-        <Slider heading="Shirts" items={data.Shirt} />
+        <Slider heading="Tops" items={data.Tops} />
         <Slider heading="Pants" items={data.Pants} />
         <Slider heading="Hats" items={data.Hat} />
       </div>
