@@ -42,24 +42,24 @@ export function BasketPopover({ children }) {
       <PopoverContent className="w-64">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">My Basket</h4>
+            <h4 className="font-bold leading-none ">My Basket</h4>
           </div>
 
           {total > 0 ? (
             <>
-              <div className="grid gap-2">
+              <div className="grid gap-6">
                 {shirts.length > 0 && (
                   <div>
-                    <span className="text-sm">Shirts</span>
+                    <span className="text-sm font-semibold">Shirts</span>
                     {shirts.map((shirt, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between mx-2"
+                        className="flex items-center justify-between "
                       >
                         <img
                           src={shirt.url}
                           alt={shirt.name}
-                          className="w-8 h-8 rounded"
+                          className="w-8 h-8 "
                         />
 
                         <Button
@@ -76,11 +76,11 @@ export function BasketPopover({ children }) {
 
                 {pants.length > 0 && (
                   <div>
-                    <span className="text-sm">Pants</span>
+                    <span className="text-sm font-semibold">Pants</span>
                     {pants.map((pant, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between mx-2"
+                        className="flex items-center justify-between "
                       >
                         <img
                           src={pant.url}
@@ -102,11 +102,11 @@ export function BasketPopover({ children }) {
 
                 {hats.length > 0 && (
                   <div>
-                    <span className="text-sm">Hats</span>
+                    <span className="text-sm font-semibold">Hats</span>
                     {hats.map((hat, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between mx-2"
+                        className="flex items-center justify-between "
                       >
                         <img
                           src={hat.url}
@@ -132,7 +132,27 @@ export function BasketPopover({ children }) {
               </Link>
             </>
           ) : (
-            <div>empty</div>
+            <div className="flex flex-col items-center justify-center p-6 text-center">
+              <svg
+                className="w-16 h-16 text-gray-300 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+              <h3 className="text-gray-700 font-medium mb-2">
+                Your basket is empty
+              </h3>
+              <p className="text-gray-500 text-sm mb-4">
+                Add items to your basket to start shopping
+              </p>
+            </div>
           )}
         </div>
       </PopoverContent>

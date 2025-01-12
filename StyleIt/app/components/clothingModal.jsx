@@ -36,7 +36,7 @@ export default function ClothingModal({ brand, type, item, children }) {
   };
 
   return (
-    <Dialog>
+    <Dialog className="">
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -50,8 +50,8 @@ export default function ClothingModal({ brand, type, item, children }) {
           className="w-full h-60 object-contain rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
         />
 
-        <DialogClose>
-          <Button type="submit" className="w-full" onClick={handleAddToCart}>
+        <DialogClose asChild>
+          <Button className="w-full mt-4 shadow-2xl" onClick={handleAddToCart}>
             Add to basket
           </Button>
         </DialogClose>

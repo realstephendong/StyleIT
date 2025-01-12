@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Shirt, User, ShoppingBag } from "lucide-react";
+import { Shirt, Plus, User, ShoppingBag } from "lucide-react";
 import { AccountPopover } from "./accountPopover";
 import { BasketPopover } from "./basketPopover";
 import Link from "next/link";
@@ -11,13 +11,15 @@ export const Navbar = () => {
   const { total } = useClothing();
 
   return (
-    <nav className="sticky top-0 left-0 right-0 bg-[#f5f5f7] shadow-md px-4 py-5 z-50 ">
+    <nav className="sticky bg-white top-0 left-0 right-0 shadow-md px-4 py-5 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link className="flex items-center space-x-2" href="/">
-          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold">W</span>
-          </div>
-          <span className="font-semibold text-lg">Wardrobe</span>
+        <Link href="/">
+          <a className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center ml-4 -mr-1">
+              <span className="text-white font-bold">S</span>
+            </div>
+            <span className="font-semibold text-lg">tyleIt</span>
+          </a>
         </Link>
 
         <div className="absolute left-1/2 transform -translate-x-1/2">
@@ -27,7 +29,11 @@ export const Navbar = () => {
           </h1>
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-6 relative">
+          <Button variant="ghost" size="icon">
+            <Plus />
+          </Button>
+
           <BasketPopover>
             <div className="relative">
               <ShoppingBag />
@@ -43,9 +49,9 @@ export const Navbar = () => {
             <Shirt />
           </Button>
 
-          <AccountPopover>
+          {/* <AccountPopover>
             <User />
-          </AccountPopover>
+          </AccountPopover> */}
         </div>
       </div>
     </nav>
