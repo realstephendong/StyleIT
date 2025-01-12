@@ -67,470 +67,398 @@ export default function VirtualDressingRoom() {
   ];
 
   const imageCache = new Map();
-  const loadImage = (src) => {
-    if (imageCache.has(src)) {
-      return Promise.resolve(imageCache.get(src));
-    }
+const loadImage = (src) => {
+  if (imageCache.has(src)) {
+    return Promise.resolve(imageCache.get(src));
+  }
 
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        imageCache.set(src, img);
-        resolve(img);
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+};
+
+// Separate transform calculation logic for better organization
+const calculateTransform = (currentTransform, previousTransform) => {
+  if (!previousTransform) return currentTransform;
+  
+  return {
+    centerX: previousTransform.centerX * SMOOTHING_FACTOR + currentTransform.centerX * (1 - SMOOTHING_FACTOR),
+    centerY: previousTransform.centerY * SMOOTHING_FACTOR + currentTransform.centerY * (1 - SMOOTHING_FACTOR),
+    scaleX: previousTransform.scaleX * SMOOTHING_FACTOR + currentTransform.scaleX * (1 - SMOOTHING_FACTOR),
+    scaleY: previousTransform.scaleY * SMOOTHING_FACTOR + currentTransform.scaleY * (1 - SMOOTHING_FACTOR),
   };
+};
 
-  const applyClothing = async (
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const transformRefs = useRef({
+    top: null,
+    bottom: null,
+    hat: null,
+  });
+  const mediaStreamRef = useRef(null);
+  const holisticRef = useRef(null);
+  const contextRef = useRef(null);
+
+  const [isMediaPipeReady, setIsMediaPipeReady] = useState(false);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [selectedItems, setSelectedItems] = useState({
+    top: null,
+    bottom: null,
+    hat: null,
+  });
+
+  // Memoize clothing sections to prevent unnecessary re-renders
+  const clothingSections = useMemo(() => ({
+    top: clothingItems.filter(item => item.type === 'top'),
+    bottom: clothingItems.filter(item => item.type === 'bottom'),
+    hat: clothingItems.filter(item => item.type === 'hat'),
+  }), []);
+
+  // Optimized toggle function using single state object
+  const toggleItem = useCallback((item) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [item.type]: prev[item.type]?.id === item.id ? null : item
+    }));
+  }, []);
+
+  const applyClothing = useCallback(async (
     poseLandmarks,
     faceLandmarks,
-    ctx,
     clothingImage,
     clothingType,
-    canvasRef,
     previousTransform
   ) => {
-    if (!poseLandmarks || !clothingImage || !canvasRef.current) {
-      return null;
+    if (!poseLandmarks || !clothingImage || !canvasRef.current || !contextRef.current) {
+      return previousTransform;
     }
 
     const canvas = canvasRef.current;
+    const ctx = contextRef.current;
 
+    // Continuing from previous file...
+
+    // Optimized hat positioning logic
     if (clothingType === "hat" && faceLandmarks) {
-      // Use face landmarks for hat positioning
-      const foreheadTop = faceLandmarks[10]; // Top of forehead
-      const leftTemple = faceLandmarks[234]; // Left temple
-      const rightTemple = faceLandmarks[454]; // Right temple
+      const foreheadTop = faceLandmarks[10];
+      const leftTemple = faceLandmarks[234];
+      const rightTemple = faceLandmarks[454];
+      const shoulders = {
+        left: poseLandmarks[11],
+        right: poseLandmarks[12]
+      };
+      const hips = {
+        left: poseLandmarks[23],
+        right: poseLandmarks[24]
+      };
 
-      // Get torso landmarks for scaling reference
-      const leftShoulder = poseLandmarks[11];
-      const rightShoulder = poseLandmarks[12];
-      const leftHip = poseLandmarks[23];
-      const rightHip = poseLandmarks[24];
+      const landmarksVisible = [
+        shoulders.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        shoulders.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        hips.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        hips.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        foreheadTop,
+        leftTemple,
+        rightTemple
+      ].every(Boolean);
 
-      if (
-        foreheadTop &&
-        leftTemple &&
-        rightTemple &&
-        leftShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD
-      ) {
-        const headWidth = Math.abs(
-          (rightTemple.x - leftTemple.x) * canvas.width
-        );
-
-        // Calculate torso height for relative scaling
+      if (landmarksVisible) {
+        const headWidth = Math.abs((rightTemple.x - leftTemple.x) * canvas.width);
         const torsoHeight = Math.abs(
-          ((leftHip.y + rightHip.y) / 2 -
-            (leftShoulder.y + rightShoulder.y) / 2) *
-            canvas.height
+          ((hips.left.y + hips.right.y) / 2 - (shoulders.left.y + shoulders.right.y) / 2) * canvas.height
         );
-
-        // Calculate vertical offset based on torso height
-        const verticalOffset = torsoHeight * 0.11;
-
-        // Position above the forehead with dynamic offset
-        const centerX = foreheadTop.x * canvas.width;
-        const centerY = foreheadTop.y * canvas.height - verticalOffset;
 
         try {
           const img = await loadImage(clothingImage);
-
-          // Scale based on head width
-          const scaleX = (headWidth / img.width) * 1.4;
-          const scaleY = (headWidth / img.width) * 1.4; // Maintain aspect ratio
-
-          const currentTransform = {
-            centerX,
-            centerY,
-            scaleX,
-            scaleY,
-          };
-
-          const smoothedTransform = previousTransform
-            ? {
-                centerX:
-                  previousTransform.centerX * 0.8 +
-                  currentTransform.centerX * 0.2,
-                centerY:
-                  previousTransform.centerY * 0.8 +
-                  currentTransform.centerY * 0.2,
-                scaleX:
-                  previousTransform.scaleX * 0.8 +
-                  currentTransform.scaleX * 0.2,
-                scaleY:
-                  previousTransform.scaleY * 0.8 +
-                  currentTransform.scaleY * 0.2,
-              }
-            : currentTransform;
+          const transform = calculateTransform({
+            centerX: foreheadTop.x * canvas.width,
+            centerY: foreheadTop.y * canvas.height - torsoHeight * 0.11,
+            scaleX: (headWidth / img.width) * 1.4,
+            scaleY: (headWidth / img.width) * 1.4
+          }, previousTransform);
 
           ctx.save();
-          ctx.translate(smoothedTransform.centerX, smoothedTransform.centerY);
-          ctx.scale(smoothedTransform.scaleX, smoothedTransform.scaleY);
-          ctx.drawImage(
-            img,
-            -img.width / 2,
-            -img.height / 2,
-            img.width,
-            img.height
-          );
+          ctx.translate(transform.centerX, transform.centerY);
+          ctx.scale(transform.scaleX, transform.scaleY);
+          ctx.drawImage(img, -img.width / 2, -img.height / 2, img.width, img.height);
           ctx.restore();
 
-          return smoothedTransform;
+          return transform;
         } catch (error) {
-          console.error("Error loading or drawing hat image:", error);
+          console.error("Error applying hat:", error);
           return previousTransform;
         }
       }
-    } else if (clothingType === "top") {
-      const leftShoulder = poseLandmarks[11];
-      const rightShoulder = poseLandmarks[12];
-      const leftHip = poseLandmarks[23];
-      const rightHip = poseLandmarks[24];
+    }
 
-      if (
-        leftShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightShoulder?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD
-      ) {
-        const shoulderWidth = Math.abs(
-          (rightShoulder.x - leftShoulder.x) * canvas.width
-        );
+    // Optimized top positioning logic
+    if (clothingType === "top") {
+      const shoulders = {
+        left: poseLandmarks[11],
+        right: poseLandmarks[12]
+      };
+      const hips = {
+        left: poseLandmarks[23],
+        right: poseLandmarks[24]
+      };
+
+      const landmarksVisible = [
+        shoulders.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        shoulders.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        hips.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        hips.right?.visibility > POSE_CONFIDENCE_THRESHOLD
+      ].every(Boolean);
+
+      if (landmarksVisible) {
+        const shoulderWidth = Math.abs((shoulders.right.x - shoulders.left.x) * canvas.width);
         const torsoHeight = Math.abs(
-          ((leftHip.y + rightHip.y) / 2 -
-            (leftShoulder.y + rightShoulder.y) / 2) *
-            canvas.height
+          ((hips.left.y + hips.right.y) / 2 - (shoulders.left.y + shoulders.right.y) / 2) * canvas.height
         );
-
-        const verticalOffset = torsoHeight * 0.1;
-
-        const centerX =
-          ((leftShoulder.x + rightShoulder.x) / 2) * canvas.width - 7;
-        const centerY =
-          ((leftShoulder.y + rightShoulder.y) / 2) * canvas.height +
-          verticalOffset;
 
         try {
           const img = await loadImage(clothingImage);
-
-          const scaleX = (shoulderWidth / img.width) * 2.2;
-          const scaleY = (torsoHeight / img.height) * 1.5;
-
-          const currentTransform = {
-            centerX,
-            centerY,
-            scaleX,
-            scaleY,
-          };
-
-          const smoothedTransform = previousTransform
-            ? {
-                centerX:
-                  previousTransform.centerX * 0.8 +
-                  currentTransform.centerX * 0.2,
-                centerY:
-                  previousTransform.centerY * 0.8 +
-                  currentTransform.centerY * 0.2,
-                scaleX:
-                  previousTransform.scaleX * 0.8 +
-                  currentTransform.scaleX * 0.2,
-                scaleY:
-                  previousTransform.scaleY * 0.8 +
-                  currentTransform.scaleY * 0.2,
-              }
-            : currentTransform;
+          const transform = calculateTransform({
+            centerX: ((shoulders.left.x + shoulders.right.x) / 2) * canvas.width - 7,
+            centerY: ((shoulders.left.y + shoulders.right.y) / 2) * canvas.height + torsoHeight * 0.1,
+            scaleX: (shoulderWidth / img.width) * 2.2,
+            scaleY: (torsoHeight / img.height) * 1.5
+          }, previousTransform);
 
           ctx.save();
-          ctx.translate(smoothedTransform.centerX, smoothedTransform.centerY);
-          ctx.scale(smoothedTransform.scaleX, smoothedTransform.scaleY);
-          ctx.drawImage(
-            img,
-            -img.width / 2,
-            -img.height / 4,
-            img.width,
-            img.height
-          );
+          ctx.translate(transform.centerX, transform.centerY);
+          ctx.scale(transform.scaleX, transform.scaleY);
+          ctx.drawImage(img, -img.width / 2, -img.height / 4, img.width, img.height);
           ctx.restore();
 
-          return smoothedTransform;
+          return transform;
         } catch (error) {
-          console.error("Error loading or drawing clothing image:", error);
+          console.error("Error applying top:", error);
           return previousTransform;
         }
       }
-    } else if (clothingType === "bottom") {
-      const leftHip = poseLandmarks[23];
-      const rightHip = poseLandmarks[24];
-      const leftKnee = poseLandmarks[25];
-      const rightKnee = poseLandmarks[26];
-      const leftAnkle = poseLandmarks[27];
-      const rightAnkle = poseLandmarks[28];
-      const leftShoulder = poseLandmarks[11];
-      const rightShoulder = poseLandmarks[12];
+    }
 
-      if (
-        leftHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightHip?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        leftKnee?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightKnee?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        leftAnkle?.visibility > POSE_CONFIDENCE_THRESHOLD &&
-        rightAnkle?.visibility > POSE_CONFIDENCE_THRESHOLD
-      ) {
-        const hipWidth = Math.abs((rightHip.x - leftHip.x) * canvas.width);
+    // Optimized bottom positioning logic
+    if (clothingType === "bottom") {
+      const landmarks = {
+        hips: {
+          left: poseLandmarks[23],
+          right: poseLandmarks[24]
+        },
+        knees: {
+          left: poseLandmarks[25],
+          right: poseLandmarks[26]
+        },
+        ankles: {
+          left: poseLandmarks[27],
+          right: poseLandmarks[28]
+        },
+        shoulders: {
+          left: poseLandmarks[11],
+          right: poseLandmarks[12]
+        }
+      };
+
+      const landmarksVisible = Object.values(landmarks).every(
+        pair => pair.left?.visibility > POSE_CONFIDENCE_THRESHOLD && 
+               pair.right?.visibility > POSE_CONFIDENCE_THRESHOLD
+      );
+
+      if (landmarksVisible) {
+        const hipWidth = Math.abs((landmarks.hips.right.x - landmarks.hips.left.x) * canvas.width);
         const legLength = Math.abs(
-          ((leftAnkle.y + rightAnkle.y) / 2 - (leftHip.y + rightHip.y) / 2) *
-            canvas.height
+          ((landmarks.ankles.left.y + landmarks.ankles.right.y) / 2 - 
+           (landmarks.hips.left.y + landmarks.hips.right.y) / 2) * canvas.height
         );
         const torsoHeight = Math.abs(
-          ((leftHip.y + rightHip.y) / 2 -
-            (leftShoulder.y + rightShoulder.y) / 2) *
-            canvas.height
+          ((landmarks.hips.left.y + landmarks.hips.right.y) / 2 - 
+           (landmarks.shoulders.left.y + landmarks.shoulders.right.y) / 2) * canvas.height
         );
-
-        const verticalOffset = torsoHeight * 0.75;
-
-        const centerX = ((leftHip.x + rightHip.x) / 2) * canvas.width;
-        const centerY =
-          ((leftHip.y + rightHip.y) / 2) * canvas.height + verticalOffset;
 
         try {
           const img = await loadImage(clothingImage);
-
-          const scaleX = (hipWidth / img.width) * 2.5;
-          const scaleY = (legLength / img.height) * 1.35;
-
-          const currentTransform = {
-            centerX,
-            centerY,
-            scaleX,
-            scaleY,
-          };
-
-          const smoothedTransform = previousTransform
-            ? {
-                centerX:
-                  previousTransform.centerX * 0.8 +
-                  currentTransform.centerX * 0.2,
-                centerY:
-                  previousTransform.centerY * 0.8 +
-                  currentTransform.centerY * 0.2,
-                scaleX:
-                  previousTransform.scaleX * 0.8 +
-                  currentTransform.scaleX * 0.2,
-                scaleY:
-                  previousTransform.scaleY * 0.8 +
-                  currentTransform.scaleY * 0.2,
-              }
-            : currentTransform;
+          const transform = calculateTransform({
+            centerX: ((landmarks.hips.left.x + landmarks.hips.right.x) / 2) * canvas.width,
+            centerY: ((landmarks.hips.left.y + landmarks.hips.right.y) / 2) * canvas.height + torsoHeight * 0.75,
+            scaleX: (hipWidth / img.width) * 2.5,
+            scaleY: (legLength / img.height) * 1.35
+          }, previousTransform);
 
           ctx.save();
-          ctx.translate(smoothedTransform.centerX, smoothedTransform.centerY);
-          ctx.scale(smoothedTransform.scaleX, smoothedTransform.scaleY);
-          ctx.drawImage(
-            img,
-            -img.width / 2,
-            -img.height / 2,
-            img.width,
-            img.height
-          );
+          ctx.translate(transform.centerX, transform.centerY);
+          ctx.scale(transform.scaleX, transform.scaleY);
+          ctx.drawImage(img, -img.width / 2, -img.height / 2, img.width, img.height);
           ctx.restore();
 
-          return smoothedTransform;
+          return transform;
         } catch (error) {
-          console.error("Error loading or drawing pants image:", error);
+          console.error("Error applying bottom:", error);
           return previousTransform;
         }
       }
     }
     return previousTransform;
-  };
-
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const topTransformRef = useRef(null);
-  const bottomTransformRef = useRef(null);
-  const hatTransformRef = useRef(null);
-  const [isMediaPipeReady, setIsMediaPipeReady] = useState(false);
-  const [isCameraReady, setIsCameraReady] = useState(false);
-  const [selectedTop, setSelectedTop] = useState(null);
-  const [selectedBottom, setSelectedBottom] = useState(null);
-  const [selectedHat, setSelectedHat] = useState(null);
-
-  const toggleItem = (item) => {
-    switch (item.type) {
-      case "top":
-        setSelectedTop(selectedTop?.id === item.id ? null : item);
-        break;
-      case "bottom":
-        setSelectedBottom(selectedBottom?.id === item.id ? null : item);
-        break;
-      case "hat":
-        setSelectedHat(selectedHat?.id === item.id ? null : item);
-        break;
-    }
-  };
-
-  // Preload images on mount
-  useEffect(() => {
-    clothingItems.forEach((item) => {
-      loadImage(item.url);
-    });
   }, []);
 
-  const onHolisticResults = React.useCallback(
-    async (results) => {
-      if (!canvasRef.current) return;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (results.image) {
-        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-      }
-
-      if (results.poseLandmarks) {
-        if (selectedBottom) {
-          bottomTransformRef.current = await applyClothing(
-            results.poseLandmarks,
-            results.faceLandmarks,
-            ctx,
-            selectedBottom.url,
-            "bottom",
-            canvasRef,
-            bottomTransformRef.current
-          );
-        }
-
-        if (selectedTop) {
-          topTransformRef.current = await applyClothing(
-            results.poseLandmarks,
-            results.faceLandmarks,
-            ctx,
-            selectedTop.url,
-            "top",
-            canvasRef,
-            topTransformRef.current
-          );
-        }
-
-        if (selectedHat && results.faceLandmarks) {
-          hatTransformRef.current = await applyClothing(
-            results.poseLandmarks,
-            results.faceLandmarks,
-            ctx,
-            selectedHat.url,
-            "hat",
-            canvasRef,
-            hatTransformRef.current
-          );
-        }
-      }
-    },
-    [selectedTop, selectedBottom, selectedHat]
-  );
-
+  // Optimized MediaPipe setup with proper cleanup
   useEffect(() => {
-    const setupMediaPipe = async () => {
-      console.log("Starting MediaPipe setup...");
-      try {
-        const { Holistic } = await import("@mediapipe/holistic");
-        const { Camera } = await import("@mediapipe/camera_utils");
+  let holisticInstance;
+  let cameraInstance;
 
-        const holistic = new Holistic({
-          locateFile: (file) =>
-            `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
-        });
+  const setupMediaPipe = async () => {
+    try {
+      const { Holistic } = await import("@mediapipe/holistic");
+      const { Camera } = await import("@mediapipe/camera_utils");
 
-        holistic.setOptions({
-          modelComplexity: 1,
-          smoothLandmarks: true,
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5,
-          refineFaceLandmarks: true,
-        });
+      holisticInstance = new Holistic({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1635989137/${file}`;
+        }
+      });
 
-        // Here's the fix: properly wire up the onResults callback
-        holistic.onResults(onHolisticResults);
+      // Modify the options
+      await holisticInstance.initialize();
+      holisticInstance.setOptions({
+        modelComplexity: 0,
+        smoothLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+        selfieMode: true
+      });
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 960, height: 720 },
           audio: false,
         });
 
-        videoRef.current.srcObject = stream;
-        setIsCameraReady(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          mediaStreamRef.current = stream;
+          setIsCameraReady(true);
+        }
 
-        const camera = new Camera(videoRef.current, {
+        // Initialize canvas context once
+        if (canvasRef.current) {
+          contextRef.current = canvasRef.current.getContext('2d');
+        }
+
+        holisticInstance.onResults(async (results) => {
+          if (!contextRef.current || !canvasRef.current) return;
+
+          const ctx = contextRef.current;
+          const canvas = canvasRef.current;
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          if (results.image) {
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+          }
+
+          if (results.poseLandmarks) {
+            // Apply clothing in reverse order for proper layering
+            if (selectedItems.bottom) {
+              transformRefs.current.bottom = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                selectedItems.bottom.url,
+                "bottom",
+                transformRefs.current.bottom
+              );
+            }
+
+            if (selectedItems.top) {
+              transformRefs.current.top = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                selectedItems.top.url,
+                "top",
+                transformRefs.current.top
+              );
+            }
+
+            if (selectedItems.hat && results.faceLandmarks) {
+              transformRefs.current.hat = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                selectedItems.hat.url,
+                "hat",
+                transformRefs.current.hat
+              );
+            }
+          }
+        });
+
+        cameraInstance = new Camera(videoRef.current, {
           onFrame: async () => {
             if (videoRef.current) {
-              await holistic.send({ image: videoRef.current });
+              await holisticInstance.send({ image: videoRef.current });
             }
           },
           width: 960,
           height: 720,
         });
 
-        await camera.start();
+        await cameraInstance.start();
         setIsMediaPipeReady(true);
       } catch (error) {
-        console.error("Error setting up MediaPipe:", error);
+        console.error("Error in MediaPipe setup:", error);
         setIsMediaPipeReady(false);
         setIsCameraReady(false);
       }
     };
 
-    let holisticInstance;
-    setupMediaPipe().then((instance) => {
-      holisticInstance = instance;
-    });
+    setupMediaPipe();
 
+    // Cleanup function
     return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach((track) => track.stop());
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
       if (holisticInstance) {
         holisticInstance.close();
       }
+      if (cameraInstance) {
+        cameraInstance.stop();
+      }
     };
-  }, [onHolisticResults]); // Added onHolisticResults to the dependency array
+  }, [applyClothing, selectedItems]);
 
-  const renderClothingSection = (type, title, selectedItem, items) => (
+  // Memoized clothing section renderer
+  const ClothingSection = useCallback(({ type, title, items }) => (
     <div className="mb-8">
       <h2 className="text-xl font-semibold mb-4">{title}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {items
-          .filter((item) => item.type === type)
-          .map((item) => (
-            <div
-              key={item.id}
-              className={`cursor-pointer transition-all duration-200 ${
-                selectedItem?.id === item.id
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className={`cursor-pointer transition-all duration-200 ${
+              selectedItems[type]?.id === item.id
                 ? "ring-4 ring-blue-500 scale-105"
-                  : "hover:scale-105"
-              }`}
-              onClick={() => toggleItem(item)}
-            >
-              <div className="bg-white p-4 rounded-lg shadow-md">
-                <img
-                  src={item.url}
-                  alt={item.name}
-                  className="w-full h-32 object-contain mb-2"
-                />
-                <p className="text-center text-sm font-medium">{item.name}</p>
-              </div>
+                : "hover:scale-105"
+            }`}
+            onClick={() => toggleItem(item)}
+          >
+            <div className="bg-white p-4 rounded-lg shadow-md">
+              <img
+                src={item.url}
+                alt={item.name}
+                className="w-full h-32 object-contain mb-2"
+                loading="lazy"
+              />
+              <p className="text-center text-sm font-medium">{item.name}</p>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
     </div>
-  );
+  ), [selectedItems, toggleItem]);
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
@@ -567,14 +495,9 @@ export default function VirtualDressingRoom() {
           </div>
 
           <div className="md:col-span-4 space-y-6">
-            {renderClothingSection("top", "Tops", selectedTop, clothingItems)}
-            {renderClothingSection(
-              "bottom",
-              "Bottoms",
-              selectedBottom,
-              clothingItems
-            )}
-            {renderClothingSection("hat", "Hats", selectedHat, clothingItems)}
+            <ClothingSection type="top" title="Tops" items={clothingSections.top} />
+            <ClothingSection type="bottom" title="Bottoms" items={clothingSections.bottom} />
+            <ClothingSection type="hat" title="Hats" items={clothingSections.hat} />
           </div>
         </div>
       </div>

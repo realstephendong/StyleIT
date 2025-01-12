@@ -26,7 +26,7 @@ export default function ClothingModal({ brand, type, children }) {
           className="w-full rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
         />
 
-        <Link href="/virtualdressingroom" passHref>
+        <Link href="/room" passHref>
           <Button type="submit" className="w-full">
             Add to cart
           </Button>

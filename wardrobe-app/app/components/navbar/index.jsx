@@ -5,7 +5,7 @@ import { PopoverButton } from "./popoverButton";
 
 export const Navbar = () => {
   return (
-    <nav className="sticky top-0 left-0 right-0 bg-white shadow-sm px-4 py-3 z-50">
+    <nav className="sticky top-0 left-0 right-0 bg-white shadow-sm px-4 py-3 z-50 bg-[#f5f5f7]">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
