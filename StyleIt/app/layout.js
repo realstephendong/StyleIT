@@ -5,7 +5,7 @@ import Footer from "./components/Footer";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const poppins = Poppins({
+const poppins = Poppins({ 
   variable: "--font-poppins",
   subsets: ["latin"], // Add additional subsets if needed
   weight: ["400", "500", "600", "700"], // Specify weights you need

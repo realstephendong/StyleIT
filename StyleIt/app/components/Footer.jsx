@@ -88,34 +88,34 @@ const Footer = () => {
           <ul className="space-y-2">
             <li>
               <a
-                href="https://discord.gg/hackathon"
+                href="https://discord.gg/"
                 className="hover:text-blue-500"
               >
-                Discord (Where the Real Chaos Happens)
+                Discord
               </a>
             </li>
             <li>
               <a
-                href="https://twitter.com/hackathon"
+                href="https://twitter.com/"
                 className="hover:text-blue-500"
               >
-                Twitter (We Post Memes)
+                Twitter
               </a>
             </li>
             <li>
               <a
-                href="https://www.linkedin.com/company/hackathon"
+                href="https://www.linkedin.com/in/stephen-dong/"
                 className="hover:text-blue-500"
               >
-                LinkedIn (Because Why Not?)
+                LinkedIn
               </a>
             </li>
             <li>
               <a
-                href="https://instagram.com/hackathon"
+                href="https://instagram.com/"
                 className="hover:text-blue-500"
               >
-                Instagram (Photos of Pizza)
+                Instagram
               </a>
             </li>
             <li>
@@ -123,7 +123,7 @@ const Footer = () => {
                 href="mailto:contact@hackathon.com"
                 className="hover:text-blue-500"
               >
-                Email (We Might Reply)
+                Email
               </a>
             </li>
           </ul>
@@ -134,10 +134,9 @@ const Footer = () => {
 
       <div className="text-center text-sm mt-4 text-slate-400">
         Made with ♥, ☕, and a lot of last-minute coding by{" "}
-        <a href="https://github.com/" className="hover:text-blue-500">
-          Hackathon Dev Team
+        <a href="https://github.com/Leg3ndary/StyleIt" className="hover:text-blue-500">
+          StyleIT Dev Team.
         </a>
-        . Open source? Maybe someday. Probably not.
       </div>
     </footer>
   );

@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export const addIfUnique = (prev, item) => {
   if (!prev) return [item];
   
-  return prev.some((existingItem) => existingItem._id === item._id)
+  return prev.some((prevItem) => prevItem._id === item._id)
     ? prev
     : [...prev, item];
 };

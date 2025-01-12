@@ -1,14 +1,20 @@
 "use client";
-
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useClothing } from "@/contexts/clothing";
-import Footer from "../components/Footer";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { addOutfit } from "../utils/api";
+import AddWardrobeModal from "../components/addToWardrobeModal";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 const SMOOTHING_FACTOR = 0.8;
 
 export default function VirtualDressingRoom() {
   const { tops, pants, hats } = useClothing();
+
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const imageCache = new Map();
   const loadImage = (src) => {
@@ -80,6 +86,11 @@ export default function VirtualDressingRoom() {
     Pants: null,
     Hat: null,
   });
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    setIsDisabled(selectedItems.Tops && selectedItems.Pants);
+  }, [selectedItems]);
 
   // Optimized toggle function using single state object
   const toggleItem = useCallback((item) => {
@@ -257,7 +268,7 @@ export default function VirtualDressingRoom() {
           }
         }
       }
-      
+
       // Optimized top positioning logic
       if (clothingType === "Tops") {
         const shoulders = {
@@ -321,11 +332,9 @@ export default function VirtualDressingRoom() {
         }
       }
       return previousTransform;
-      
     },
     []
   );
-  
 
   // Optimized MediaPipe setup with proper cleanup
   useEffect(() => {
@@ -454,15 +463,15 @@ export default function VirtualDressingRoom() {
   const ClothingSection = useCallback(
     ({ type, title, items }) => (
       <div className="my-4">
-        <h2 className="text-xl font-semibold my-2 mb-6">{title}</h2>
-        <div className="flex gap-4 overflow-x-auto pb-6 pt-4 w-full px-4">
-          {items.map((item) => (
+        <h2 className="text-xl font-semibold my-2 mb-6 px-4">{title}</h2>
+        <div className="flex gap-6 overflow-x-auto pb-6 pt-4 w-full px-4">
+          {items.map((item, index) => (
             <div
-              key={item._id}
-              className={`cursor-pointer transition-all flex-shrink-0 w-[280px] duration-200 relative flex flex-col bg-[#f5f5f7] shadow-lg transform hover:scale-105 hover:translate-y-1 rounded-lg overflow-hidden ${
+              key={index}
+              className={`cursor-pointer transition-all flex-shrink-0 w-[280px] duration-200 relative flex flex-col bg-[#f5f5f7] shadow-md transform hover:scale-105 hover:translate-y-1 rounded-lg overflow-hidden ${
                 selectedItems[type]?._id === item._id
                   ? "ring-4 ring-blue-500 scale-105 rounded-lg"
-                  : "hover:scale-105 hover:-mb-2"
+                  : "hover:scale-105"
               }`}
               onClick={() => toggleItem(item)}
             >
@@ -498,14 +507,21 @@ export default function VirtualDressingRoom() {
     [selectedItems, toggleItem]
   );
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const clothes = Object.values(selectedItems).filter((item) => item);
+    const payload = {
+      name: name,
+      clothes: clothes,
+    };
+    setName("");
+    addOutfit(payload);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-white py-8 w-full">
         <div className="container mx-auto">
-          <h1 className="text-3xl font-bold mb-8 text-center">
-            Virtual Dressing Room
-          </h1>
-
           <div className="grid w-7/8 mx-auto gap-8">
             <div className="md:col-span-8">
               <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-lg">
@@ -521,11 +537,13 @@ export default function VirtualDressingRoom() {
                 <video
                   ref={videoRef}
                   className="w-full h-full my-4"
+                  style={{ transform: "scaleX(-1)" }}
                   autoPlay
                   playsInline
                 />
                 <canvas
                   ref={canvasRef}
+                  style={{ transform: "scaleX(-1)" }}
                   className="absolute top-0 left-0 w-full h-full"
                   width={960}
                   height={640}
@@ -533,14 +551,29 @@ export default function VirtualDressingRoom() {
               </div>
             </div>
           </div>
-          <div className="md:col-span-4 space-y-6 mx-auto p-4 my-4">
+          <div className="md:col-span-4 space-y-6 mx-auto p-4 my-4 ">
+            <ClothingSection type="Hat" title="Hats" items={hats} />
             <ClothingSection type="Tops" title="Tops" items={tops} />
             <ClothingSection type="Pants" title="Bottoms" items={pants} />
-            <ClothingSection type="Hat" title="Hats" items={hats} />
+          </div>
+
+          <div className="flex justify-center">
+            <AddWardrobeModal
+              handleSubmit={handleSubmit}
+              name={name}
+              setName={setName}
+            >
+              <Button
+                className="w-full mx-8 font-semibold"
+                disabled={!isDisabled}
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
+                Add to Wardrobe
+              </Button>
+            </AddWardrobeModal>
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

@@ -97,6 +97,7 @@ export default function AddModal({ children }) {
       toast({
         title: "Success!",
         description: "Clothing item added successfully",
+        duration: 1000,
       });
     } catch (error) {
       console.error("Error:", error);
@@ -107,6 +108,7 @@ export default function AddModal({ children }) {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to add clothing item",
+        duration: 1000,
       });
     } finally {
       setIsLoading(false);
@@ -123,10 +125,10 @@ export default function AddModal({ children }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-xl font-bold">
             Add New Clothing Item
           </DialogTitle>
-          <DialogDescription className="text-sm text-gray-500 mt-1">
+          <DialogDescription className="text-sm text-gray-500 mt-1 font-semibold">
             Add your own clothing item to the collection. Please provide a
             direct image URL.
           </DialogDescription>
@@ -140,7 +142,7 @@ export default function AddModal({ children }) {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="type" className="text-sm font-medium">
+            <Label htmlFor="type" className="text-sm font-semibold">
               Type
             </Label>
             <select
@@ -160,7 +162,7 @@ export default function AddModal({ children }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="url" className="text-sm font-medium">
+            <Label htmlFor="url" className="text-sm font-mediumsemibold">
               Image URL
             </Label>
             <Input
@@ -176,7 +178,7 @@ export default function AddModal({ children }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-sm font-medium">
+            <Label htmlFor="price" className="text-sm font-semibold">
               Price ($)
             </Label>
             <Input
@@ -195,7 +197,7 @@ export default function AddModal({ children }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand" className="text-sm font-medium">
+            <Label htmlFor="brand" className="text-sm font-semibold">
               Brand
             </Label>
             <Input
@@ -210,9 +212,17 @@ export default function AddModal({ children }) {
             />
           </div>
 
-          <div className="flex flex-col gap-3 pt-2">
-            <Button disabled={isLoading} type="submit" className="relative">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <div className="flex flex-col gap-3 pt-2 ">
+            <Button
+              disabled={isLoading}
+              type="submit"
+              className="relative font-semibold"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="mr-2 h-4 w-4" />
+              )}
               {isLoading ? "Adding..." : "Add Item"}
             </Button>
             <DialogClose ref={closeRef} className="hidden" />

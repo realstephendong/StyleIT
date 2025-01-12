@@ -28,7 +28,7 @@ export const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-6 relative">
-            <AddModal />
+          <AddModal />
 
           <BasketPopover>
             <div className="relative">

@@ -64,21 +64,6 @@ const Slider = ({ heading, items }) => {
           ))}
         </div>
 
-        {/* Navigation Buttons */}
-        {/* <button
-          onClick={handlePrev}
-          className="absolute cursor-pointer top-1/2 left-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
-          disabled={currentSlide === 0}
-        >
-          <ChevronLeft />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute cursor-pointer top-1/2 right-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
-          disabled={currentSlide >= Math.ceil(items.length / itemsPerSlide) - 1}
-        >
-          <ChevronRight />
-        </button> */}
       </div>
     </div>
   );
