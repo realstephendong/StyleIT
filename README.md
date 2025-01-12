@@ -8,8 +8,9 @@ View in real-time any clothes you want on your own body, no matter where you are
 
 ## Contributors
 - [Stephen](https://github.com/realstephendong)
-    - Worked primarily on the front-end, making the clothes appear on the user in real-time.
-    - Worked with Mediapipe to detect the user's body and place the clothes on them.
+    - Worked heavily on the front-end, optimizing camera resource usage and real-time the clothing overlay on web-camera interface.
+    - Added rotational functionality on headwear.
+    - Worked closely with Google's Mediapipe AI model to detect the user's body anchor points and dynamically transform clothing to fit the user.
 - [Rafael](https://github.com/raf-fonseca)
     - Led the back-end development, syncing the user's data and clothing data to the front-end.
     - Worked on the front-end creating components and connecting backend routes to the front-end.
