@@ -26,9 +26,7 @@ export const Navbar = () => {
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <h1 className="text-lg font-semibold">Got a minute? Style it!</h1>
         </div>
-        <Button>
-          <Plus />
-        </Button>
+        
 
         <div className="flex items-center space-x-6 relative">
           <BasketPopover>
