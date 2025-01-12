@@ -13,13 +13,11 @@ export const Navbar = () => {
   return (
     <nav className="sticky bg-white top-0 left-0 right-0 shadow-md px-4 py-5 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link href="/">
-          <a className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center ml-4 -mr-1">
-              <span className="text-white font-bold">S</span>
-            </div>
-            <span className="font-semibold text-lg">tyleIt</span>
-          </a>
+        <Link className="flex items-center space-x-2" href="/">
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center ml-4 -mr-1">
+            <span className="text-white font-bold">S</span>
+          </div>
+          <span className="font-semibold text-lg">tyleIt</span>
         </Link>
 
         <div className="absolute left-1/2 transform -translate-x-1/2">
