@@ -40,99 +40,107 @@ export function BasketPopover({ children }) {
       </PopoverTrigger>
 
       <PopoverContent className="w-64">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-bold leading-none ">My Basket</h4>
-          </div>
-
+        <div className="grid">
+          <h4 className="font-bold leading-none mb-4">My Basket</h4>
+          <div className="w-full h-0.5 bg-gray-100 my-1 rounded-full" />
           {total > 0 ? (
             <>
               <div className="grid gap-1">
                 {tops.length > 0 && (
-                  <div>
-                    <span className="text-sm font-semibold">Tops</span>
-                    {tops.map((top, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between "
-                      >
-                        <img
-                          src={top.url}
-                          alt={top.brand}
-                          className="w-8 h-8 object-contain"
-                        />
-                        <p className="text-black mr-auto ml-4 text-sm">{top.brand}</p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemove(top)}
+                  <>
+                    <div className="py-2">
+                      <span className="text-sm font-semibold py-2">Tops</span>
+                      {tops.map((top, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between "
                         >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                          <img
+                            src={top.url}
+                            alt={top.brand}
+                            className="w-8 h-8 object-contain"
+                          />
+                          <p className="text-black mr-auto ml-4 text-sm">
+                            {top.brand}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemove(top)}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="w-full h-0.5 bg-gray-100 my-1 rounded-full" />
+                  </>
                 )}
 
                 {pants.length > 0 && (
-                  <div>
-                    <span className="text-sm font-semibold">Pants</span>
-                    {pants.map((pant, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between "
-                      >
-                        <img
-                          src={pant.url}
-                          alt={pant.name}
-                          className="w-8 h-8 object-contain"
-                        />
-                        <p className="text-black mr-auto ml-4 text-sm">
-                          {pant.brand}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemove(pant)}
+                  <>
+                    <div>
+                      <span className="text-sm font-semibold py-2">Pants</span>
+                      {pants.map((pant, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between "
                         >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                          <img
+                            src={pant.url}
+                            alt={pant.name}
+                            className="w-8 h-8 object-contain"
+                          />
+                          <p className="text-black mr-auto ml-4 text-sm">
+                            {pant.brand}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemove(pant)}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="w-full h-0.5 bg-gray-100 my-1 rounded-full" />
+                  </>
                 )}
-
                 {hats.length > 0 && (
-                  <div>
-                    <span className="text-sm font-semibold">Hats</span>
-                    {hats.map((hat, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between "
-                      >
-                        <img
-                          src={hat.url}
-                          alt={hat.brand}
-                          className="w-8 h-8 object-contain"
-                        />
-                        <p className="text-black mr-auto ml-4 text-sm">
-                          {hat.brand}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemove(hat)}
+                  <>
+                    <div>
+                      <span className="text-sm font-semibold py-2">Hats</span>
+                      {hats.map((hat, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between "
                         >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                          <img
+                            src={hat.url}
+                            alt={hat.brand}
+                            className="w-8 h-8 object-contain"
+                          />
+                          <p className="text-black mr-auto ml-4 text-sm">
+                            {hat.brand}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemove(hat)}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="w-full h-0.5 bg-gray-100 my-1 rounded-full" />
+                  </>
                 )}
               </div>
 
               <Link href="/room">
-                <Button className="w-full font-semibold">
+                <Button className="w-full font-semibold mt-4">
                   Try it on! <MoveRight />
                 </Button>
               </Link>

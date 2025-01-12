@@ -1,2 +1,2 @@
 export * from "./FilterBar";
-export * from "./OutfitGrid";
+export * from "./OutfitCard";

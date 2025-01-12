@@ -10,15 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { useClothing } from "@/contexts/clothing";
 import { Plus } from "lucide-react";
+import { addIfUnique } from "@/lib/utils";
+import { useRouter } from "next/router";
 
 export default function ClothingModal({ brand, type, item, children }) {
   const { setTops, setPants, setHats } = useClothing();
-
-  const addIfUnique = (prev, item) => {
-    return prev.some((existingItem) => existingItem._id === item._id)
-      ? prev
-      : [...prev, item];
-  };
 
   const handleAddToCart = () => {
     switch (type) {

@@ -3,6 +3,7 @@ import { ClothingProvider } from "@/contexts/clothing";
 import { Navbar } from "./components/navbar";
 import Footer from "./components/Footer";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -23,6 +24,8 @@ export default function RootLayout({ children }) {
           <Navbar />
           {children}
           <Footer />
+
+          <Toaster />
         </ClothingProvider>
       </body>
     </html>

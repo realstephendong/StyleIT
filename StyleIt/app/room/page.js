@@ -179,70 +179,6 @@ export default function VirtualDressingRoom() {
         }
       }
 
-      // Optimized top positioning logic
-      if (clothingType === "Tops") {
-        const shoulders = {
-          left: poseLandmarks[11],
-          right: poseLandmarks[12],
-        };
-        const hips = {
-          left: poseLandmarks[23],
-          right: poseLandmarks[24],
-        };
-
-        const landmarksVisible = [
-          shoulders.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
-          shoulders.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
-          hips.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
-          hips.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
-        ].every(Boolean);
-
-        if (landmarksVisible) {
-          const shoulderWidth = Math.abs(
-            (shoulders.right.x - shoulders.left.x) * canvas.width
-          );
-          const torsoHeight = Math.abs(
-            ((hips.left.y + hips.right.y) / 2 -
-              (shoulders.left.y + shoulders.right.y) / 2) *
-              canvas.height
-          );
-
-          try {
-            const img = await loadImage(clothingImage);
-            const transform = calculateTransform(
-              {
-                centerX:
-                  ((shoulders.left.x + shoulders.right.x) / 2) * canvas.width -
-                  7,
-                centerY:
-                  ((shoulders.left.y + shoulders.right.y) / 2) * canvas.height +
-                  torsoHeight * 0.1,
-                scaleX: (shoulderWidth / img.width) * 2.2,
-                scaleY: (torsoHeight / img.height) * 1.5,
-              },
-              previousTransform
-            );
-
-            ctx.save();
-            ctx.translate(transform.centerX, transform.centerY);
-            ctx.scale(transform.scaleX, transform.scaleY);
-            ctx.drawImage(
-              img,
-              -img.width / 2,
-              -img.height / 4,
-              img.width,
-              img.height
-            );
-            ctx.restore();
-
-            return transform;
-          } catch (error) {
-            console.error("Error applying top:", error);
-            return previousTransform;
-          }
-        }
-      }
-
       // Optimized bottom positioning logic
       if (clothingType === "Pants") {
         const landmarks = {
@@ -321,10 +257,75 @@ export default function VirtualDressingRoom() {
           }
         }
       }
+      
+      // Optimized top positioning logic
+      if (clothingType === "Tops") {
+        const shoulders = {
+          left: poseLandmarks[11],
+          right: poseLandmarks[12],
+        };
+        const hips = {
+          left: poseLandmarks[23],
+          right: poseLandmarks[24],
+        };
+
+        const landmarksVisible = [
+          shoulders.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+          shoulders.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
+          hips.left?.visibility > POSE_CONFIDENCE_THRESHOLD,
+          hips.right?.visibility > POSE_CONFIDENCE_THRESHOLD,
+        ].every(Boolean);
+
+        if (landmarksVisible) {
+          const shoulderWidth = Math.abs(
+            (shoulders.right.x - shoulders.left.x) * canvas.width
+          );
+          const torsoHeight = Math.abs(
+            ((hips.left.y + hips.right.y) / 2 -
+              (shoulders.left.y + shoulders.right.y) / 2) *
+              canvas.height
+          );
+
+          try {
+            const img = await loadImage(clothingImage);
+            const transform = calculateTransform(
+              {
+                centerX:
+                  ((shoulders.left.x + shoulders.right.x) / 2) * canvas.width,
+                centerY:
+                  ((shoulders.left.y + shoulders.right.y) / 2) * canvas.height +
+                  torsoHeight * 0.1,
+                scaleX: (shoulderWidth / img.width) * 2.2,
+                scaleY: (torsoHeight / img.height) * 1.5,
+              },
+              previousTransform
+            );
+
+            ctx.save();
+            ctx.translate(transform.centerX, transform.centerY);
+            ctx.scale(transform.scaleX, transform.scaleY);
+            ctx.drawImage(
+              img,
+              -img.width / 2,
+              -img.height / 4,
+              img.width,
+              img.height
+            );
+            ctx.restore();
+
+            return transform;
+          } catch (error) {
+            console.error("Error applying top:", error);
+            return previousTransform;
+          }
+        }
+      }
       return previousTransform;
+      
     },
     []
   );
+  
 
   // Optimized MediaPipe setup with proper cleanup
   useEffect(() => {
@@ -382,16 +383,6 @@ export default function VirtualDressingRoom() {
 
           if (results.poseLandmarks) {
             // Apply clothing in reverse order for proper layering
-            if (selectedItems.Tops) {
-              transformRefs.current.Tops = await applyClothing(
-                results.poseLandmarks,
-                results.faceLandmarks,
-                selectedItems.Tops.url,
-                "Tops",
-                transformRefs.current.Tops
-              );
-            }
-
             if (selectedItems.Pants) {
               transformRefs.current.Pants = await applyClothing(
                 results.poseLandmarks,
@@ -399,6 +390,16 @@ export default function VirtualDressingRoom() {
                 selectedItems.Pants.url,
                 "Pants",
                 transformRefs.current.Pants
+              );
+            }
+
+            if (selectedItems.Tops) {
+              transformRefs.current.Tops = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                selectedItems.Tops.url,
+                "Tops",
+                transformRefs.current.Tops
               );
             }
 
@@ -458,10 +459,10 @@ export default function VirtualDressingRoom() {
           {items.map((item) => (
             <div
               key={item._id}
-              className={`cursor-pointer transition-all flex-shrink-0 w-[280px] duration-200 relative flex flex-col bg-[#f5f5f7] shadow-lg transform hover:scale-105 rounded-lg overflow-hidden ${
+              className={`cursor-pointer transition-all flex-shrink-0 w-[280px] duration-200 relative flex flex-col bg-[#f5f5f7] shadow-lg transform hover:scale-105 hover:translate-y-1 rounded-lg overflow-hidden ${
                 selectedItems[type]?._id === item._id
                   ? "ring-4 ring-blue-500 scale-105 rounded-lg"
-                  : "hover:scale-105"
+                  : "hover:scale-105 hover:-mb-2"
               }`}
               onClick={() => toggleItem(item)}
             >
