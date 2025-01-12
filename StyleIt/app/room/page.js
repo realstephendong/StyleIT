@@ -1,16 +1,14 @@
-// /StyleIt/app/room/page.js
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { Navbar } from "../components/navbar";
-import Footer from "../components/Footer/Footer";
-import { getClothing } from "../utils/api";
 import { useClothing } from "@/contexts/clothing";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 const SMOOTHING_FACTOR = 0.8;
 
 export default function VirtualDressingRoom() {
+  const { tops, pants, hats } = useClothing();
+
   const imageCache = new Map();
   const loadImage = (src) => {
     if (imageCache.has(src)) {
@@ -66,9 +64,9 @@ export default function VirtualDressingRoom() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const transformRefs = useRef({
-    top: null,
-    bottom: null,
-    hat: null,
+    Tops: null,
+    Pants: null,
+    Hat: null,
   });
   const mediaStreamRef = useRef(null);
   const holisticRef = useRef(null);
@@ -81,18 +79,7 @@ export default function VirtualDressingRoom() {
     Pants: null,
     Hat: null,
   });
-  const [clothingItems, setClothingItems] = useState([]);
-  const { tops, pants, hats } = useClothing();
 
-  // Memoize clothing sections to prevent unnecessary re-renders
-  const clothingSections = useMemo(
-    () => ({
-      Tops: tops,
-      Pants: pants,
-      Hat: hats,
-    }),
-    [tops, pants, hats]
-  );
 
   // Optimized toggle function using single state object
   const toggleItem = useCallback((item) => {
@@ -362,7 +349,7 @@ export default function VirtualDressingRoom() {
           smoothLandmarks: true,
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5,
-          selfieMode: false,
+          selfieMode: true,
         });
 
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -395,33 +382,33 @@ export default function VirtualDressingRoom() {
 
           if (results.poseLandmarks) {
             // Apply clothing in reverse order for proper layering
-            if (selectedItems.bottom) {
-              transformRefs.current.bottom = await applyClothing(
+            if (selectedItems.Tops) {
+              transformRefs.current.Tops = await applyClothing(
                 results.poseLandmarks,
                 results.faceLandmarks,
-                selectedItems.bottom.url,
-                "Pants",
-                transformRefs.current.bottom
-              );
-            }
-
-            if (selectedItems.top) {
-              transformRefs.current.top = await applyClothing(
-                results.poseLandmarks,
-                results.faceLandmarks,
-                selectedItems.top.url,
+                selectedItems.Tops.url,
                 "Tops",
-                transformRefs.current.top
+                transformRefs.current.Tops
               );
             }
 
-            if (selectedItems.hat && results.faceLandmarks) {
-              transformRefs.current.hat = await applyClothing(
+            if (selectedItems.Pants) {
+              transformRefs.current.Pants = await applyClothing(
                 results.poseLandmarks,
                 results.faceLandmarks,
-                selectedItems.hat.url,
+                selectedItems.Pants.url,
+                "Pants",
+                transformRefs.current.Pants
+              );
+            }
+
+            if (selectedItems.Hat && results.faceLandmarks) {
+              transformRefs.current.Hat = await applyClothing(
+                results.poseLandmarks,
+                results.faceLandmarks,
+                selectedItems.Hat.url,
                 "Hat",
-                transformRefs.current.hat
+                transformRefs.current.Hat
               );
             }
           }
@@ -468,15 +455,15 @@ export default function VirtualDressingRoom() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {items?.map((item, index) => (
+          {items.map((item) => (
             <div
-              key={item._id || index}
+              key={item._id}
               className={`cursor-pointer transition-all duration-200 ${
                 selectedItems[type]?._id === item._id
                   ? "ring-4 ring-blue-500 scale-105"
                   : "hover:scale-105"
               }`}
-              onClick={() => toggleItem({ ...item, type })}
+              onClick={() => toggleItem(item)}
             >
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <img
@@ -496,50 +483,46 @@ export default function VirtualDressingRoom() {
   );
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-100 py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8 text-center">
-            Virtual Dressing Room
-          </h1>
+    <div className="min-h-screen bg-gray-100 py-8">
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          Virtual Dressing Room
+        </h1>
 
-          <div className="gap-8 justify-center w-3/4 mx-auto">
-            <div className="md:col-span-8 mx-auto w-full">
-              <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-lg">
-                {(!isMediaPipeReady || !isCameraReady) && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-50">
-                    <div className="text-white text-lg">
-                      {!isMediaPipeReady
-                        ? "Loading MediaPipe..."
-                        : "Initializing camera..."}
-                    </div>
+        <div className="grid md:grid-cols-12 gap-8">
+          <div className="md:col-span-8">
+            <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-lg">
+              {(!isMediaPipeReady || !isCameraReady) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-50">
+                  <div className="text-white text-lg">
+                    {!isMediaPipeReady
+                      ? "Loading MediaPipe..."
+                      : "Initializing camera..."}
                   </div>
-                )}
-                <video
-                  ref={videoRef}
-                  className="w-full h-full mx-auto"
-                  autoPlay
-                  playsInline
-                />
-                <canvas
-                  ref={canvasRef}
-                  className="absolute top-0 left-0 w-full h-full mx-auto"
-                  width={960}
-                  height={720}
-                />
-              </div>
+                </div>
+              )}
+              <video
+                ref={videoRef}
+                className="w-full h-full"
+                autoPlay
+                playsInline
+              />
+              <canvas
+                ref={canvasRef}
+                className="absolute top-0 left-0 w-full h-full"
+                width={960}
+                height={720}
+              />
             </div>
           </div>
-          <div className="md:col-span-4 space-y-6 my-12 mx-5">
-            <ClothingSection type="Tops" title="Tops" items={clothingSections.Tops} />
-            <ClothingSection type="Pants" title="Bottoms" items={clothingSections.Pants} />
-            <ClothingSection type="Hat" title="Hats" items={clothingSections.Hat} />
+
+          <div className="md:col-span-4 space-y-6">
+            <ClothingSection type="Tops" title="Tops" items={tops} />
+            <ClothingSection type="Pants" title="Bottoms" items={pants} />
+            <ClothingSection type="Hat" title="Hats" items={hats} />
           </div>
         </div>
       </div>
-
-      <Footer />
-    </>
+    </div>
   );
 }
