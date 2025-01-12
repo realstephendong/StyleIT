@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ClothingModal from "./clothingModal";
 
@@ -13,21 +13,35 @@ const getEmoji = (heading) => {
 };
 
 const Slider = ({ heading, items }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // const [currentSlide, setCurrentSlide] = useState(0);
+  // const containerRef = useRef(null);
+
+  //   updateItemsPerSlide();
+  //   window.addEventListener("resize", updateItemsPerSlide);
+  //   return () => window.removeEventListener("resize", updateItemsPerSlide);
+  // }, []);
+
+  // const handlePrev = () => {
+  //   setCurrentSlide((prev) => Math.max(prev - 1, 0));
+  // };
+
+  // const handleNext = () => {
+  //   setCurrentSlide((prev) =>
+  //     Math.min(prev + 1, Math.ceil(items.length / itemsPerSlide) - 1)
+  //   );
+  // };
 
   return (
     <div className="py-4">
-      <h2 className="text-3xl font-bold flex items-center gap-2  mx-8">
+      <h2 className="text-3xl font-bold flex items-center gap-2 mx-8">
         {getEmoji(heading)} {heading}
         <span className="text-sm text-gray-500 ml-2">
           ({items.length} items)
         </span>
       </h2>
       <div className="relative group">
-        <div className="overflow-hidden">
           <div
-            className="flex transition-transform duration-500 ease-out p-8 min-h-64 rounded-lg shadow-xl gap-4"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            className="flex overflow-x-auto transition-transform duration-500 ease-out p-8 min-h-64 rounded-lg gap-4"
           >
             {items.map((item, index) => (
               <ClothingModal
@@ -56,9 +70,7 @@ const Slider = ({ heading, items }) => {
                     </div>
 
                     <div className="p-4 border-t bg-white">
-                      <h3 className="font-bold text-gray-900">
-                        {item.brand}
-                      </h3>
+                      <h3 className="font-bold text-gray-900">{item.brand}</h3>
                       <div className="flex justify-between items-center mt-1">
                         <p className="text-gray-600 text-sm">{item.type}</p>
                         <p className="font-semibold text-gray-900">
@@ -70,8 +82,23 @@ const Slider = ({ heading, items }) => {
                 </div>
               </ClothingModal>
             ))}
-          </div>
         </div>
+
+        {/* Navigation Buttons */}
+        {/* <button
+          onClick={handlePrev}
+          className="absolute cursor-pointer top-1/2 left-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
+          disabled={currentSlide === 0}
+        >
+          <ChevronLeft />
+        </button>
+        <button
+          onClick={handleNext}
+          className="absolute cursor-pointer top-1/2 right-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
+          disabled={currentSlide >= Math.ceil(items.length / itemsPerSlide) - 1}
+        >
+          <ChevronRight />
+        </button> */}
       </div>
     </div>
   );

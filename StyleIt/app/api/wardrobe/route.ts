@@ -11,12 +11,8 @@ export async function POST(request: Request) {
     const data = await request.json();
     
     // Insert into database
-    const result = await db.collection('clothes').insertOne({
-      type: data.type,
-      price: data.price,
-      url: data.url,
-      brand: data.brand,
-    });
+    const result = await db.collection('wardrobe')
+    .insertOne({ name: data.name, clothes: data.clothes });
 
     return NextResponse.json(result);
 
@@ -30,16 +26,10 @@ export async function GET(request: Request) {
   try {
     const client = await connectDB();
     const db = client.db("deltahacks");
-    const clothesData = await db.collection('clothes').find({}).toArray();
-
-    const clothes = clothesData.reduce((acc, item) => {
-      acc[item.type] = acc[item.type] || [];
-      acc[item.type].push(item);
-      return acc;
-    }, { Tops: [], Pants: [], Hat: [] });
+    const wardrobe = await db.collection('wardrobe').find({}).toArray();
 
 
-    return NextResponse.json({ success: true, data: clothes });
+    return NextResponse.json({ success: true, data: wardrobe});
 
   } catch (error) {
     console.error('Error fetching clothing:', error);
@@ -49,5 +39,4 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
-
 

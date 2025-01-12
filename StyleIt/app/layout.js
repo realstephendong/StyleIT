@@ -1,5 +1,7 @@
 import { Poppins } from "next/font/google";
 import { ClothingProvider } from "@/contexts/clothing";
+import { Navbar } from "./components/navbar";
+import Footer from "./components/Footer";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -17,7 +19,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <ClothingProvider>{children}</ClothingProvider>
+        <ClothingProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </ClothingProvider>
       </body>
     </html>
   );

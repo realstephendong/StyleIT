@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useClothing } from "@/contexts/clothing";
+import Footer from "../components/Footer";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 const SMOOTHING_FACTOR = 0.8;
@@ -79,7 +80,6 @@ export default function VirtualDressingRoom() {
     Pants: null,
     Hat: null,
   });
-
 
   // Optimized toggle function using single state object
   const toggleItem = useCallback((item) => {
@@ -345,15 +345,15 @@ export default function VirtualDressingRoom() {
         // Modify the options
         await holisticInstance.initialize();
         holisticInstance.setOptions({
-          modelComplexity: 0,
+          modelComplexity: 1,
           smoothLandmarks: true,
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5,
-          selfieMode: true,
+          selfieMode: false,
         });
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 960, height: 720 },
+          video: { width: 960, height: 640 },
           audio: false,
         });
 
@@ -421,7 +421,7 @@ export default function VirtualDressingRoom() {
             }
           },
           width: 960,
-          height: 720,
+          height: 640,
         });
 
         await cameraInstance.start();
@@ -452,27 +452,42 @@ export default function VirtualDressingRoom() {
   // Memoized clothing section renderer
   const ClothingSection = useCallback(
     ({ type, title, items }) => (
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="my-4">
+        <h2 className="text-xl font-semibold my-2 mb-6">{title}</h2>
+        <div className="flex gap-4 overflow-x-auto pb-6 pt-4 w-full px-4">
           {items.map((item) => (
             <div
               key={item._id}
-              className={`cursor-pointer transition-all duration-200 ${
+              className={`cursor-pointer transition-all flex-shrink-0 w-[280px] duration-200 relative flex flex-col bg-[#f5f5f7] shadow-lg transform hover:scale-105 rounded-lg overflow-hidden ${
                 selectedItems[type]?._id === item._id
-                  ? "ring-4 ring-blue-500 scale-105"
+                  ? "ring-4 ring-blue-500 scale-105 rounded-lg"
                   : "hover:scale-105"
               }`}
               onClick={() => toggleItem(item)}
             >
-              <div className="bg-white p-4 rounded-lg shadow-md">
+              <div className="h-64 flex items-center justify-center p-2">
                 <img
                   src={item.url}
                   alt={item.brand}
-                  className="w-full h-32 object-contain mb-2"
-                  loading="lazy"
+                  className="max-h-full max-w-full object-contain p-4"
                 />
-                <p className="text-center text-sm font-medium">{item.brand}</p>
+                <div className="absolute inset-0 bg-opacity-0 group-hover/item:bg-opacity-50 transition-opacity duration-300 bg-[#ffffff]">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-semibold text-white">
+                        {item.brand}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t bg-white">
+                <h3 className="font-bold text-gray-900">{item.brand}</h3>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="text-gray-600 text-sm">{item.type}</p>
+                  <p className="font-semibold text-gray-900">${item.price}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -483,46 +498,48 @@ export default function VirtualDressingRoom() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          Virtual Dressing Room
-        </h1>
+    <>
+      <div className="min-h-screen bg-white py-8 w-full">
+        <div className="container mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-center">
+            Virtual Dressing Room
+          </h1>
 
-        <div className="grid md:grid-cols-12 gap-8">
-          <div className="md:col-span-8">
-            <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-lg">
-              {(!isMediaPipeReady || !isCameraReady) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-50">
-                  <div className="text-white text-lg">
-                    {!isMediaPipeReady
-                      ? "Loading MediaPipe..."
-                      : "Initializing camera..."}
+          <div className="grid w-7/8 mx-auto gap-8">
+            <div className="md:col-span-8">
+              <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-lg">
+                {(!isMediaPipeReady || !isCameraReady) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 z-30">
+                    <div className="text-white text-2xl font-black">
+                      {!isMediaPipeReady
+                        ? "Select some clothes below!"
+                        : "Initializing camera..."}
+                    </div>
                   </div>
-                </div>
-              )}
-              <video
-                ref={videoRef}
-                className="w-full h-full"
-                autoPlay
-                playsInline
-              />
-              <canvas
-                ref={canvasRef}
-                className="absolute top-0 left-0 w-full h-full"
-                width={960}
-                height={720}
-              />
+                )}
+                <video
+                  ref={videoRef}
+                  className="w-full h-full my-4"
+                  autoPlay
+                  playsInline
+                />
+                <canvas
+                  ref={canvasRef}
+                  className="absolute top-0 left-0 w-full h-full"
+                  width={960}
+                  height={640}
+                />
+              </div>
             </div>
           </div>
-
-          <div className="md:col-span-4 space-y-6">
+          <div className="md:col-span-4 space-y-6 mx-auto p-4 my-4">
             <ClothingSection type="Tops" title="Tops" items={tops} />
             <ClothingSection type="Pants" title="Bottoms" items={pants} />
             <ClothingSection type="Hat" title="Hats" items={hats} />
           </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

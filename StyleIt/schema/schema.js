@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const ClothingSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["Shirt", "Pants", "Hat"], // add more types later
+    enum: ["Tops", "Pants", "Hat"], // add more types later
   },
   price: Number,
   url: String,
@@ -14,5 +14,14 @@ const ClothingSchema = new mongoose.Schema({
 // Prevent duplicate entries based on imagePath
 ClothingSchema.index({ url: 1 }, { unique: true });
 
-export default mongoose.models.Clothing ||
-  mongoose.model("Clothing", ClothingSchema);
+const WardrobeSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  clothes: [ClothingSchema],
+});
+
+const Clothing =
+  mongoose.models.Clothing || mongoose.model("Clothing", ClothingSchema);
+const Wardrobe =
+  mongoose.models.Wardrobe || mongoose.model("Wardrobe", WardrobeSchema);
+
+export { Clothing, Wardrobe };

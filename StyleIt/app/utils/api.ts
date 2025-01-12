@@ -32,3 +32,35 @@ export async function getClothing() {
         throw error;
     }
 }
+
+export async function getOutfits() {
+  try {
+    const response = await fetch('/api/wardrobe', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }); 
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+      console.error('Error fetching clothing:', error);
+      throw error;
+  }
+}
+
+export async function addOutfit(outfitData) {
+  try {
+    const response = await fetch('/api/clothing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(outfitData)
+    });
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding clothing:', error);
+    throw error;
+  }
+}

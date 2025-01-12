@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Plus, Minus, Settings, User, MoveRight } from "lucide-react";
+import { Trash2, MoveRight } from "lucide-react";
 import { useClothing } from "@/contexts/clothing";
 
 export function BasketPopover({ children }) {
@@ -47,7 +47,7 @@ export function BasketPopover({ children }) {
 
           {total > 0 ? (
             <>
-              <div className="grid gap-6">
+              <div className="grid gap-1">
                 {tops.length > 0 && (
                   <div>
                     <span className="text-sm font-semibold">Tops</span>
@@ -58,16 +58,16 @@ export function BasketPopover({ children }) {
                       >
                         <img
                           src={top.url}
-                          alt={top.name}
+                          alt={top.brand}
                           className="w-8 h-8 object-contain"
                         />
-
+                        <p className="text-black mr-auto ml-4 text-sm">{top.brand}</p>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemove(top)}
                         >
-                          <Minus />
+                          <Trash2 />
                         </Button>
                       </div>
                     ))}
@@ -87,13 +87,15 @@ export function BasketPopover({ children }) {
                           alt={pant.name}
                           className="w-8 h-8 object-contain"
                         />
-
+                        <p className="text-black mr-auto ml-4 text-sm">
+                          {pant.brand}
+                        </p>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemove(pant)}
                         >
-                          <Minus />
+                          <Trash2 />
                         </Button>
                       </div>
                     ))}
@@ -110,16 +112,18 @@ export function BasketPopover({ children }) {
                       >
                         <img
                           src={hat.url}
-                          alt={hat.name}
+                          alt={hat.brand}
                           className="w-8 h-8 object-contain"
                         />
-
+                        <p className="text-black mr-auto ml-4 text-sm">
+                          {hat.brand}
+                        </p>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemove(hat)}
                         >
-                          <Minus />
+                          <Trash2 />
                         </Button>
                       </div>
                     ))}
