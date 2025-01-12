@@ -14,6 +14,7 @@ const Slider = ({ heading, items }) => {
     const maxSlides = Math.ceil(items.length / 5) - 1;
     setCurrentSlide((prev) => Math.min(maxSlides, prev + 1));
   };
+  
 
   return (
     <div className="mb-8">

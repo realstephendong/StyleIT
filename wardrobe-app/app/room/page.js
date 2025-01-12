@@ -349,7 +349,6 @@ export default function VirtualDressingRoom() {
     }
     return previousTransform;
   };
-
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const topTransformRef = useRef(null);
