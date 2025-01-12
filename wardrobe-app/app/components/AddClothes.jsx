@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addClothing } from "../utils/api";
+
 import { useState } from "react";
 
 export default function AddClothes() {
@@ -13,7 +14,6 @@ export default function AddClothes() {
     price: "",
     brand: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,14 +22,12 @@ export default function AddClothes() {
       [name]: value,
     }));
   };
-
+  // Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      // Process the image
-      console.log("Processing image...");
+      // First, process the image through the background removal server
       const response = await fetch(
         `http://localhost:3001/remove-background?url=${encodeURIComponent(
           formData.url
@@ -41,33 +39,33 @@ export default function AddClothes() {
         throw new Error("Failed to process image");
       }
 
-      console.log("Image processed successfully:", data.url);
+      // Get the processed image URL
+      const processedImageUrl = data.url;
 
-      // Create clothing data with processed image
+      // Now create the clothing data with the processed image URL
       const clothingData = {
         ...formData,
-        url: data.url,
+        url: processedImageUrl, // Use the processed image URL
         price: parseFloat(formData.price),
       };
 
-      // Add to database
+      // Submit the clothing data to your database
       await addClothing(clothingData);
 
-      // Reset form
+      // Reset form after successful submission
       setFormData({
         type: "",
         url: "",
         price: "",
         brand: "",
       });
+
+      console.log("Clothing item added successfully!");
     } catch (error) {
       console.error("Error:", error);
-      alert("Error: " + error.message);
-    } finally {
-      setIsLoading(false);
+      alert("Error processing image or adding clothing item");
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -118,8 +116,6 @@ export default function AddClothes() {
           required
         />
       </div>
-
-      {/* Brand Field */}
       <div className="flex flex-col space-y-1">
         <Label htmlFor="brand" className="my-2">
           Brand
@@ -133,10 +129,7 @@ export default function AddClothes() {
           required
         />
       </div>
-
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Processing..." : "Submit"}
-      </Button>
+      <Button type="submit">Submit</Button>
     </form>
   );
 }

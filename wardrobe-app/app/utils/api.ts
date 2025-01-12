@@ -21,10 +21,10 @@ export async function addClothing(clothingData) {
 // To fetch clothing items
 export async function getClothing() {
     try {
-        const response = await fetch('/api/clothing', {
+        const response = await fetch('http://localhost:3000/api/clothing', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-        });
+        }); 
         const data = await response.json();
         console.log(data);
         return data.data;

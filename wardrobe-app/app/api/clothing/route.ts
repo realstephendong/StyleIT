@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     const client = await connectDB();
     const db = client.db("deltahacks");
     const clothes = await db.collection('clothes').find({}).toArray();
+    console.log('Clothing:', clothes);
 
     return NextResponse.json({ 
       success: true, 
