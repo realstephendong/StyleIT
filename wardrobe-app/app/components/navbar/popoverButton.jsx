@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "next/link";
 import {
   Popover,
   PopoverContent,
@@ -7,6 +8,10 @@ import {
 import { Plus, Settings, User } from "lucide-react";
 
 export function PopoverButton({ children }) {
+  const handleClick = () => {
+    console.log("clicked");
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>

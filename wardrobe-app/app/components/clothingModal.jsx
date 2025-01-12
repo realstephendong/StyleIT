@@ -10,7 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 
-export default function ClothingModal({ brand, type, children }) {
+export default function ClothingModal({ brand, type, item, children }) {
+  const handleAddToCart = () => {
+    const cartItems = [];
+    cartItems.push(item.url);
+    console.log(cartItems);
+  }
+    
+  };
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -27,11 +34,11 @@ export default function ClothingModal({ brand, type, children }) {
         />
 
         <Link href="/virtualdressingroom" passHref>
-          <Button type="submit" className="w-full">
-            Try it out
+          <Button type="submit" className="w-full" onClick={handleAddToCart}>
+            Add to cart
           </Button>
         </Link>
       </DialogContent>
     </Dialog>
   );
-}
+

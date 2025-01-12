@@ -30,13 +30,16 @@ export async function GET(request: Request) {
   try {
     const client = await connectDB();
     const db = client.db("deltahacks");
-    const clothes = await db.collection('clothes').find({}).toArray();
-    console.log('Clothing:', clothes);
+    const clothesData = await db.collection('clothes').find({}).toArray();
 
-    return NextResponse.json({ 
-      success: true, 
-      data: clothes 
-    });
+    const clothes = clothesData.reduce((acc, item) => {
+      acc[item.type] = acc[item.type] || [];
+      acc[item.type].push(item);
+      return acc;
+    }, { shirt: [], pants: [], hat: [] });
+
+
+    return NextResponse.json({ success: true, data: clothes });
 
   } catch (error) {
     console.error('Error fetching clothing:', error);

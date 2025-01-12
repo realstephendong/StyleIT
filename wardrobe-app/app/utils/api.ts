@@ -26,7 +26,6 @@ export async function getClothing() {
           headers: { 'Content-Type': 'application/json' },
         }); 
         const data = await response.json();
-        console.log(data);
         return data.data;
     } catch (error) {
         console.error('Error fetching clothing:', error);

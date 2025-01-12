@@ -25,18 +25,24 @@ const Slider = ({ heading, items }) => {
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
             {items.map((item, index) => (
-              <ClothingModal brand={"Brand Name"} type={heading} key={index}>
+              <ClothingModal
+                brand={item.brand}
+                type={heading}
+                item={item}
+                key={index}
+              >
                 <div className="flex-none w-1/5 px-1 cursor-pointer">
-                  <div className="relative group/item">
+                  <div className="relative w-full pb-[75%]">
                     <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
+                      src={item.url}
+                      alt={item.brand}
+                      className="w-full rounded-md transform transition-transform duration-300
+                      group-hover/item:scale-105 "
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover/item:bg-opacity-50 transition-opacity duration-300 rounded-md">
                       <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300">
                         <div className="flex justify-between items-center">
-                          <p className="text-sm font-semibold">{item.title}</p>
+                          <p className="text-sm font-semibold">{item.brand}</p>
                         </div>
                       </div>
                     </div>
