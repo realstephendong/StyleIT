@@ -1,4 +1,4 @@
-# StyleIt
+# StyleIT
 
 StyleIt lets you download images of clothes from anywhere online and instantly see how they’d look on you in real life. Try outfits from around the world effortlessly—no fitting rooms needed!
 
