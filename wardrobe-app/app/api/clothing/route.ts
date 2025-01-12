@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       acc[item.type] = acc[item.type] || [];
       acc[item.type].push(item);
       return acc;
-    }, { shirt: [], pants: [], hat: [] });
+    }, { Shirt: [], Pants: [], Hat: [] });
 
 
     return NextResponse.json({ success: true, data: clothes });
