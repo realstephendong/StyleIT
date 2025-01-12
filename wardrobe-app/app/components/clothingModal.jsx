@@ -11,8 +11,6 @@ import {
 import Link from "next/link";
 
 export default function ClothingModal({ brand, type, children }) {
-    
-  };
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -29,11 +27,11 @@ export default function ClothingModal({ brand, type, children }) {
         />
 
         <Link href="/virtualdressingroom" passHref>
-          <Button type="submit" className="w-full" >
+          <Button type="submit" className="w-full">
             Add to cart
           </Button>
         </Link>
       </DialogContent>
     </Dialog>
   );
-
+}

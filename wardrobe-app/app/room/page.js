@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
+const SMOOTHING_FACTOR = 0.8;
 
 export default function VirtualDressingRoom() {
   const clothingItems = [
@@ -65,7 +66,6 @@ export default function VirtualDressingRoom() {
     },
   ];
 
-  // Rest of the image loading and clothing application logic remains the same
   const imageCache = new Map();
   const loadImage = (src) => {
     if (imageCache.has(src)) {
@@ -131,7 +131,7 @@ export default function VirtualDressingRoom() {
         );
 
         // Calculate vertical offset based on torso height
-        const verticalOffset = torsoHeight * 0.11; // Adjust this multiplier to fine-tune the positioning
+        const verticalOffset = torsoHeight * 0.11;
 
         // Position above the forehead with dynamic offset
         const centerX = foreheadTop.x * canvas.width;
@@ -349,6 +349,7 @@ export default function VirtualDressingRoom() {
     }
     return previousTransform;
   };
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const topTransformRef = useRef(null);
@@ -360,7 +361,6 @@ export default function VirtualDressingRoom() {
   const [selectedBottom, setSelectedBottom] = useState(null);
   const [selectedHat, setSelectedHat] = useState(null);
 
-  // Handle item selection/deselection
   const toggleItem = (item) => {
     switch (item.type) {
       case "top":
@@ -382,7 +382,6 @@ export default function VirtualDressingRoom() {
     });
   }, []);
 
-  // Memoize the holistic callback to prevent unnecessary re-renders
   const onHolisticResults = React.useCallback(
     async (results) => {
       if (!canvasRef.current) return;
@@ -437,7 +436,6 @@ export default function VirtualDressingRoom() {
     [selectedTop, selectedBottom, selectedHat]
   );
 
-  // Setup MediaPipe once and update only the callback
   useEffect(() => {
     const setupMediaPipe = async () => {
       console.log("Starting MediaPipe setup...");
@@ -458,7 +456,8 @@ export default function VirtualDressingRoom() {
           refineFaceLandmarks: true,
         });
 
-        holistic.onResults(async (results) => {});
+        // Here's the fix: properly wire up the onResults callback
+        holistic.onResults(onHolisticResults);
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 960, height: 720 },
@@ -501,7 +500,7 @@ export default function VirtualDressingRoom() {
         holisticInstance.close();
       }
     };
-  }, []); // Only run setup once
+  }, [onHolisticResults]); // Added onHolisticResults to the dependency array
 
   const renderClothingSection = (type, title, selectedItem, items) => (
     <div className="mb-8">
@@ -514,7 +513,7 @@ export default function VirtualDressingRoom() {
               key={item.id}
               className={`cursor-pointer transition-all duration-200 ${
                 selectedItem?.id === item.id
-                  ? "ring-4 ring-blue-500 scale-105"
+                ? "ring-4 ring-blue-500 scale-105"
                   : "hover:scale-105"
               }`}
               onClick={() => toggleItem(item)}
