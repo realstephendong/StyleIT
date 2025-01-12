@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 const SMOOTHING_FACTOR = 0.8;
