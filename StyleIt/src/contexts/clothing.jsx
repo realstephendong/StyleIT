@@ -20,8 +20,8 @@ export function ClothingProvider({ children }) {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    setState("tops", shirts);
-  }, [shirts]);
+    setState("tops", tops);
+  }, [tops]);
 
   useEffect(() => {
     setState("pants", pants);
@@ -33,7 +33,7 @@ export function ClothingProvider({ children }) {
 
   useEffect(() => {
     setTotal(tops.length + pants.length + hats.length);
-  }, [shirts, pants, hats]);
+  }, [tops, pants, hats]);
 
   return (
     <ClothingContext.Provider

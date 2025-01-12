@@ -10,7 +10,7 @@ import { Plus, Minus, Settings, User, MoveRight } from "lucide-react";
 import { useClothing } from "@/contexts/clothing";
 
 export function BasketPopover({ children }) {
-  const { tops, pants, hats, setTops, setPants, setHats, total } =
+  const { shirts, pants, hats, setShirts, setPants, setHats, total } =
     useClothing();
 
   const filterItems = (prev, item) => {
@@ -19,8 +19,8 @@ export function BasketPopover({ children }) {
 
   const handleRemove = (item) => {
     switch (item.type) {
-      case "Tops":
-        setTops((prev) => filterItems(prev, item));
+      case "Shirt":
+        setShirts((prev) => filterItems(prev, item));
         break;
       case "Pants":
         setPants((prev) => filterItems(prev, item));
@@ -48,24 +48,24 @@ export function BasketPopover({ children }) {
           {total > 0 ? (
             <>
               <div className="grid gap-6">
-                {tops.length > 0 && (
+                {shirts.length > 0 && (
                   <div>
-                    <span className="text-sm font-semibold">Tops</span>
-                    {tops.map((top, index) => (
+                    <span className="text-sm font-semibold">Shirts</span>
+                    {shirts.map((shirt, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between "
                       >
                         <img
-                          src={top.url}
-                          alt={top.name}
-                          className="w-8 h-8 object-contain"
+                          src={shirt.url}
+                          alt={shirt.name}
+                          className="w-8 h-8 "
                         />
 
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleRemove(top)}
+                          onClick={() => handleRemove(shirt)}
                         >
                           <Minus />
                         </Button>
@@ -85,7 +85,7 @@ export function BasketPopover({ children }) {
                         <img
                           src={pant.url}
                           alt={pant.name}
-                          className="w-8 h-8 object-contain"
+                          className="w-8 h-8 rounded"
                         />
 
                         <Button
@@ -111,7 +111,7 @@ export function BasketPopover({ children }) {
                         <img
                           src={hat.url}
                           alt={hat.name}
-                          className="w-8 h-8 object-contain"
+                          className="w-8 h-8 rounded"
                         />
 
                         <Button
@@ -129,7 +129,7 @@ export function BasketPopover({ children }) {
 
               <Link href="/room">
                 <Button className="w-full font-semibold">
-                  Try it on! <MoveRight />
+                  <MoveRight /> Try it on! sdf
                 </Button>
               </Link>
             </>
@@ -152,7 +152,7 @@ export function BasketPopover({ children }) {
                 Your basket is empty
               </h3>
               <p className="text-gray-500 text-sm mb-4">
-                Add items to your basket to try them on
+                Add items to your basket to start shopping
               </p>
             </div>
           )}

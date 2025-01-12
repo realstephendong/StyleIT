@@ -9,9 +9,10 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useClothing } from "@/contexts/clothing";
+import { Plus } from "lucide-react";
 
 export default function ClothingModal({ brand, type, item, children }) {
-  const { setShirts, setPants, setHats } = useClothing();
+  const { setTops, setPants, setHats } = useClothing();
 
   const addIfUnique = (prev, item) => {
     return prev.some((existingItem) => existingItem._id === item._id)
@@ -21,8 +22,8 @@ export default function ClothingModal({ brand, type, item, children }) {
 
   const handleAddToCart = () => {
     switch (type) {
-      case "Shirts":
-        setShirts((prev) => addIfUnique(prev, item));
+      case "Tops":
+        setTops((prev) => addIfUnique(prev, item));
         break;
       case "Pants":
         setPants((prev) => addIfUnique(prev, item));
@@ -52,9 +53,10 @@ export default function ClothingModal({ brand, type, item, children }) {
 
         <DialogClose asChild>
           <Button
-            className="w-full mt-4 shadow-2xl font-semibold"
+            className="w-full mt-4 shadow-2xl font-semibold p-2"
             onClick={handleAddToCart}
           >
+            <Plus />
             Add to basket
           </Button>
         </DialogClose>

@@ -82,7 +82,9 @@ const Footer = () => {
         </div>
 
         <div className="footer-section">
-          <h4 className="text-lg font-bold text-slate-400 mb-4">Connect with Us</h4>
+          <h4 className="text-lg font-bold text-slate-400 mb-4">
+            Connect with Us
+          </h4>
           <ul className="space-y-2">
             <li>
               <a
@@ -128,68 +130,9 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-        <div className="footer-section">
-          <h4 className="text-lg font-bold text-slate-400 mb-4">Resources</h4>
-          <ul className="space-y-2">
-            <li>
-              <a href="#getting-started" className="hover:text-blue-500">
-                Getting Started (Good Luck)
-              </a>
-            </li>
-            <li>
-              <a href="#code-of-conduct" className="hover:text-blue-500">
-                Code of Conduct (Read This, Please)
-              </a>
-            </li>
-            <li>
-              <a href="#template-library" className="hover:text-blue-500">
-                Template Library (Because You Procrastinated)
-              </a>
-            </li>
-            <li>
-              <a href="#submission-guide" className="hover:text-blue-500">
-                Submission Guide (Better Hurry Up)
-              </a>
-            </li>
-            <li>
-              <a href="#debugging-101" className="hover:text-blue-500">
-                Debugging 101 (When Everything Fails)
-              </a>
-            </li>
-          </ul>
-        </div>
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mt-8"></div>
 
-        <div className="footer-section">
-          <h4 className="text-lg font-bold text-slate-400 mb-4">
-            Legal & Fine Print
-          </h4>
-          <p className="text-sm leading-6">
-            Hackathon 2025. All rights reserved (or maybe not). By
-            participating, you agree to our terms of service, privacy policy,
-            and probably some other things we forgot to mention. No developers
-            were harmed (much) during the making of this hackathon. Use at your
-            own risk.
-          </p>
-        </div>
-
-        <div className="footer-section">
-          <h4 className="text-lg font-bold text-slate-400 mb-4">About Us</h4>
-          <p className="text-sm leading-6">
-            Hackathon Dev Team is a group of sleep-deprived coders fueled by
-            caffeine, ramen, and sheer determination. Our mission? To bring
-            chaos and creativity to every hackathon.
-          </p>
-          <a
-            href="https://github.com/"
-            className="block mt-4 text-blue-500 hover:text-yellow-500"
-          >
-            Contribute on GitHub
-          </a>
-        </div>
-      </div>
-
-      <div className="text-center text-sm mt-12 text-slate-400">
+      <div className="text-center text-sm mt-4 text-slate-400">
         Made with ♥, ☕, and a lot of last-minute coding by{" "}
         <a href="https://github.com/" className="hover:text-blue-500">
           Hackathon Dev Team

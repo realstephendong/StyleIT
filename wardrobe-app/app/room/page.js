@@ -1,16 +1,73 @@
-// /StyleIt/app/room/page.js
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Navbar } from "../components/navbar";
 import Footer from "../components/Footer/Footer";
-import { getClothing } from "../utils/api";
-import { useClothing } from "@/contexts/clothing";
 
 const POSE_CONFIDENCE_THRESHOLD = 0.7;
 const SMOOTHING_FACTOR = 0.8;
 
 export default function VirtualDressingRoom() {
+  const clothingItems = [
+    // Shirts
+    {
+      id: 1,
+      name: "Basic White T-Shirt",
+      url: "https://i.imgur.com/OvY5xxt.png",
+      type: "top",
+    },
+    {
+      id: 2,
+      name: "Black T-Shirt",
+      url: "https://i.imgur.com/nWBw3Zh.png",
+      type: "top",
+    },
+    {
+      id: 3,
+      name: "Blue Hoodie",
+      url: "https://i.imgur.com/K5UYJM3.png",
+      type: "top",
+    },
+    // Pants
+    {
+      id: 4,
+      name: "Blue Jeans",
+      url: "https://i.imgur.com/ExddW8J.png",
+      type: "bottom",
+    },
+    {
+      id: 5,
+      name: "Black Pants",
+      url: "https://i.imgur.com/YD23Yw9.png",
+      type: "bottom",
+    },
+    {
+      id: 6,
+      name: "Khaki Pants",
+      url: "https://i.imgur.com/Hx9NxPs.png",
+      type: "bottom",
+    },
+    // Hats
+    {
+      id: 7,
+      name: "Black Beanie",
+      url: "https://imgur.com/tn3dnbq.png",
+      type: "hat",
+    },
+    {
+      id: 8,
+      name: "Red Baseball Cap",
+      url: "https://i.imgur.com/PXVYbA2.png",
+      type: "hat",
+    },
+    {
+      id: 9,
+      name: "Blue Bucket Hat",
+      url: "https://i.imgur.com/L5R8NVF.png",
+      type: "hat",
+    },
+  ];
+
   const imageCache = new Map();
   const loadImage = (src) => {
     if (imageCache.has(src)) {
@@ -77,28 +134,26 @@ export default function VirtualDressingRoom() {
   const [isMediaPipeReady, setIsMediaPipeReady] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [selectedItems, setSelectedItems] = useState({
-    Tops: null,
-    Pants: null,
-    Hat: null,
+    top: null,
+    bottom: null,
+    hat: null,
   });
-  const [clothingItems, setClothingItems] = useState([]);
-  const { tops, pants, hats } = useClothing();
 
   // Memoize clothing sections to prevent unnecessary re-renders
   const clothingSections = useMemo(
     () => ({
-      Tops: tops,
-      Pants: pants,
-      Hat: hats,
+      top: clothingItems.filter((item) => item.type === "top"),
+      bottom: clothingItems.filter((item) => item.type === "bottom"),
+      hat: clothingItems.filter((item) => item.type === "hat"),
     }),
-    [tops, pants, hats]
+    []
   );
 
   // Optimized toggle function using single state object
   const toggleItem = useCallback((item) => {
     setSelectedItems((prev) => ({
       ...prev,
-      [item.type]: prev[item.type]?._id === item._id ? null : item,
+      [item.type]: prev[item.type]?.id === item.id ? null : item,
     }));
   }, []);
 
@@ -122,7 +177,7 @@ export default function VirtualDressingRoom() {
       const canvas = canvasRef.current;
       const ctx = contextRef.current;
 
-      if (clothingType === "Hat" && faceLandmarks) {
+      if (clothingType === "hat" && faceLandmarks) {
         const foreheadTop = faceLandmarks[10];
         const leftTemple = faceLandmarks[234];
         const rightTemple = faceLandmarks[454];
@@ -193,7 +248,7 @@ export default function VirtualDressingRoom() {
       }
 
       // Optimized top positioning logic
-      if (clothingType === "Tops") {
+      if (clothingType === "top") {
         const shoulders = {
           left: poseLandmarks[11],
           right: poseLandmarks[12],
@@ -257,7 +312,7 @@ export default function VirtualDressingRoom() {
       }
 
       // Optimized bottom positioning logic
-      if (clothingType === "Pants") {
+      if (clothingType === "bottom") {
         const landmarks = {
           hips: {
             left: poseLandmarks[23],
@@ -400,7 +455,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 selectedItems.bottom.url,
-                "Pants",
+                "bottom",
                 transformRefs.current.bottom
               );
             }
@@ -410,7 +465,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 selectedItems.top.url,
-                "Tops",
+                "top",
                 transformRefs.current.top
               );
             }
@@ -420,7 +475,7 @@ export default function VirtualDressingRoom() {
                 results.poseLandmarks,
                 results.faceLandmarks,
                 selectedItems.hat.url,
-                "Hat",
+                "hat",
                 transformRefs.current.hat
               );
             }
@@ -468,24 +523,24 @@ export default function VirtualDressingRoom() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {items?.map((item, index) => (
+          {items.map((item) => (
             <div
-              key={item._id || index}
+              key={item.id}
               className={`cursor-pointer transition-all duration-200 ${
-                selectedItems[type]?._id === item._id
+                selectedItems[type]?.id === item.id
                   ? "ring-4 ring-blue-500 scale-105"
                   : "hover:scale-105"
               }`}
-              onClick={() => toggleItem({ ...item, type })}
+              onClick={() => toggleItem(item)}
             >
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <img
                   src={item.url}
-                  alt={item.brand}
+                  alt={item.name}
                   className="w-full h-32 object-contain mb-2"
                   loading="lazy"
                 />
-                <p className="text-center text-sm font-medium">{item.brand}</p>
+                <p className="text-center text-sm font-medium">{item.name}</p>
               </div>
             </div>
           ))}
@@ -532,9 +587,21 @@ export default function VirtualDressingRoom() {
             </div>
           </div>
           <div className="md:col-span-4 space-y-6 my-12 mx-5">
-            <ClothingSection type="Tops" title="Tops" items={clothingSections.Tops} />
-            <ClothingSection type="Pants" title="Bottoms" items={clothingSections.Pants} />
-            <ClothingSection type="Hat" title="Hats" items={clothingSections.Hat} />
+            <ClothingSection
+              type="top"
+              title="Tops"
+              items={clothingSections.top}
+            />
+            <ClothingSection
+              type="bottom"
+              title="Bottoms"
+              items={clothingSections.bottom}
+            />
+            <ClothingSection
+              type="hat"
+              title="Hats"
+              items={clothingSections.hat}
+            />
           </div>
         </div>
       </div>
