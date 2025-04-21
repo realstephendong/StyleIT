@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import ClothingModal from "./clothingModal";
+import { deleteClothing } from '../utils/api';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 const getEmoji = (heading) => {
   const emojis = {
@@ -13,6 +16,28 @@ const getEmoji = (heading) => {
 };
 
 const Slider = ({ heading, items }) => {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteClothing(id);
+      toast({
+        title: "Success!",
+        description: "Clothing item deleted successfully",
+        duration: 1000,
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to delete clothing item",
+        duration: 1000,
+      });
+    }
+  };
+
   return (
     <div className="py-4">
       <h2 className="text-3xl font-bold flex items-center gap-2 mx-8">
@@ -29,6 +54,7 @@ const Slider = ({ heading, items }) => {
               type={heading}
               item={item}
               key={index}
+              onDelete={() => handleDelete(item._id)}
             >
               <div className="flex-none w-[280px] cursor-pointer">
                 <div className="relative flex flex-col bg-[#f5f5f7] shadow-xl transform transition-transform duration-200 hover:scale-105 hover:-translate-y-2 rounded-lg overflow-hidden">
@@ -44,6 +70,15 @@ const Slider = ({ heading, items }) => {
                           <p className="text-sm font-semibold text-white">
                             {item.brand}
                           </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(item._id);
+                            }}
+                            className="text-white hover:text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </div>

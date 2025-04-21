@@ -53,18 +53,27 @@ export default function AddModal({ children }) {
         throw new Error("Please enter a valid image URL");
       }
 
+      // Check if URL points to an image by fetching headers
+      const headResponse = await fetch(formData.url, { method: 'HEAD' });
+      const contentType = headResponse.headers.get('content-type');
+      
+      if (!contentType || !contentType.startsWith('image/')) {
+        throw new Error("Please enter a URL that points to an image file");
+      }
+
       // First, process the image through the background removal server
-      const response = await fetch(
+      const processResponse = await fetch(
         `http://localhost:3001/remove-background?url=${encodeURIComponent(
           formData.url
         )}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to process image");
+      if (!processResponse.ok) {
+        const errorData = await processResponse.json();
+        throw new Error(errorData.error || "Failed to process image");
       }
 
-      const data = await response.json();
+      const data = await processResponse.json();
 
       if (!data.success) {
         throw new Error(data.error || "Failed to process image");

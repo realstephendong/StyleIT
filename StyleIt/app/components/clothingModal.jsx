@@ -13,7 +13,7 @@ import { Plus } from "lucide-react";
 import { addIfUnique } from "@/lib/utils";
 import { useRouter } from "next/router";
 
-export default function ClothingModal({ brand, type, item, children }) {
+export default function ClothingModal({ children, brand, type, item, onDelete }) {
   const { setTops, setPants, setHats } = useClothing();
 
   const handleAddToCart = () => {
@@ -33,29 +33,32 @@ export default function ClothingModal({ brand, type, item, children }) {
   };
 
   return (
-    <Dialog className="">
+    <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{brand}</DialogTitle>
-          <DialogDescription>{type}</DialogDescription>
+          <DialogDescription>
+            {type} - ${item.price}
+          </DialogDescription>
         </DialogHeader>
-
-        <img
-          src={item.url}
-          alt="Image"
-          className="w-full h-60 object-contain rounded-md transform transition-transform duration-300 group-hover/item:scale-105"
-        />
-
-        <DialogClose asChild>
-          <Button
-            className="w-full mt-4 shadow-2xl font-semibold p-2"
-            onClick={handleAddToCart}
-          >
-            <Plus />
-            Add to basket
-          </Button>
-        </DialogClose>
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center justify-center">
+            <img
+              src={item.url}
+              alt={brand}
+              className="max-h-64 max-w-full object-contain"
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <Button onClick={onDelete} variant="destructive">
+              Delete Item
+            </Button>
+            <Button onClick={() => window.open(item.url, '_blank')}>
+              View Original
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
